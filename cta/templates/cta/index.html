@@ -1,0 +1,9 @@
+{% if raw_datas %}
+<ul>
+    {% for raw_data in raw_datas %}
+    <li><a href="/cta/{{ raw_data.id }}/">{{ raw_data.name }}</a></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No CTA are available.</p>
+{% endif %}

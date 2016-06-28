@@ -1,6 +1,18 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-# Create your views here.
+from django.http import Http404
+from .models import RawData
+
 
 def index(request):
-    return HttpResponse("Hi there!")
+    raw_datas = RawData.objects.order_by('-date').all()
+    context = {
+        'raw_datas': raw_datas
+    }
+    return render(request, 'cta/index.html', context)
+
+def show(request, raw_data_id):
+    try:
+        raw_data = RawData.objects.get(pk=raw_data_id)
+    except RawData.DoesNotExist:
+        raise Http404("Question does not exist")
+    return render(request, 'cta/show.html', {'raw_data': raw_data})
