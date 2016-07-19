@@ -17,7 +17,7 @@ def show(request, raw_data_id):
         raise Http404("Question does not exist")
     return render(request, 'cta/show.html', {'raw_data': raw_data})
 
-def mark(request, raw_data_id):
+def update(request, raw_data_id):
     try:
         raw_data = RawData.objects.get(pk=raw_data_id)
     except RawData.DoesNotExist:

@@ -1,3 +1,9 @@
-<hr/>
-{{ raw_data.raw }}
-<hr/>
+<h1>{{ raw_data.name }}</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'cta:update' raw_data.id %}" method="post">
+    {% csrf_token %}
+    <textarea name="raw">{{ raw_data.raw }}</textarea>
+    <input type="submit" value="Save"/>
+</form>
