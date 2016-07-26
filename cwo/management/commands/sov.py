@@ -13,7 +13,12 @@ class Command(BaseCommand):
         print('Total: {}'.format(structures.totalCount))
         print('Total: {}'.format(len(structures.items)))
 
+        types = {}
+
         for structure in structures.items:
+
+            types[structure.type.id_str] = structure.type.name
+
             if structure.solarSystem.name == 'BWF-ZZ':
                 pprint.pprint(structure.data)
 
@@ -23,3 +28,4 @@ class Command(BaseCommand):
                 # stats = bwf.stats()
                 # pprint.pprint(stats.data)
 
+        pprint.pprint(types)

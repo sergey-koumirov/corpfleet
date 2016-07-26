@@ -16,9 +16,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Constellation',
             fields=[
-                ('id', models.BigIntegerField()),
+                ('id', models.BigIntegerField(primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=200)),
-                ('region_id', models.BigIntegerField(primary_key=True, serialize=False)),
+                ('region_id', models.BigIntegerField()),
             ],
         ),
         migrations.CreateModel(
