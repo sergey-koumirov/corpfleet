@@ -15,7 +15,7 @@ class Command(BaseCommand):
 
         for structure in structures.items:
             if structure.solarSystem.name == 'BWF-ZZ':
-                print(structure)
+                pprint.pprint(structure.data)
 
                 # bwf = system()
                 # pprint.pprint(bwf.data)
