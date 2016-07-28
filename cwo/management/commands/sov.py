@@ -1,31 +1,40 @@
 from django.core.management.base import BaseCommand, CommandError
 from preston.crest import Preston
-import pprint
+from cwo.models import Structure
+from django.utils import timezone
+import datetime
+
 
 class Command(BaseCommand):
     help = 'Update Sov Info'
 
     def handle(self, *args, **options):
         preston = Preston()
-        structures = preston.sovereignty.structures()
+        today = timezone.now()
+        print(today)
 
-        print('Pages: {}'.format(structures.pageCount))
-        print('Total: {}'.format(structures.totalCount))
-        print('Total: {}'.format(len(structures.items)))
+        current = Structure.objects.filter(date1__lte=today, date2__gte=today)
+        current_hash = {}
+        for key, value in current.items():
+            current_hash[key] = value
 
-        types = {}
+        snapshot = preston.sovereignty.structures()
 
-        for structure in structures.items:
+        for structure in snapshot.items:
 
-            types[structure.type.id_str] = structure.type.name
+            if current_hash.has_key(structure.structureID):
+                print('existing structure')
+                str = Structure.objects.get(structure_id=structure.structureID)
 
-            if structure.solarSystem.name == 'BWF-ZZ':
-                pprint.pprint(structure.data)
-
-                # bwf = system()
-                # pprint.pprint(bwf.data)
-                #
-                # stats = bwf.stats()
-                # pprint.pprint(stats.data)
-
-        pprint.pprint(types)
+            else:
+                print('new structure')
+                new = Structure(
+                    alliance_id = structure.alliance.id,
+                    defence = structure.vulnerabilityOccupancyLevel,
+                    structure_id = structure.structureID,
+                    system_id = structure.solarSystem.id,
+                    type_id = structure.type.id,
+                    date1 = today,
+                    date2 = datetime.datetime(9999, 12, 31, 23, 59, 59)
+                )
+                new.save()

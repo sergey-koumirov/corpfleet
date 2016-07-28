@@ -41,7 +41,7 @@ class StructureType(models.Model):
 
 
 class Structure(models.Model):
-    id = models.BigIntegerField(primary_key=True)
+    id = models.AutoField(primary_key=True)
     alliance_id = models.BigIntegerField()
     defence = models.FloatField()
     structure_id = models.BigIntegerField()
