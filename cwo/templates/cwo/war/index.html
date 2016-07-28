@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<h4>Wars</h4>
+<a href="{% url 'cwo:war_new' %}">New</a>
+
+{% if wars %}
+<ul>
+    {% for war in wars %}
+    <li><a href="{% url 'cwo:show' war.id %}">{{ war.name }}</a></li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No wars are available.</p>
+{% endif %}
+
+{% endblock %}

@@ -7,6 +7,7 @@ from decimal import *
 import datetime
 import pprint
 
+
 class Command(BaseCommand):
     help = 'Update Sov Info'
 
@@ -26,6 +27,7 @@ class Command(BaseCommand):
                 print('new alliance {}'.format(s.alliance.name))
                 alliance = Alliance(id=s.alliance.id, name=s.alliance.name)
                 alliance.save()
+                alliances[s.alliance.id] = alliance
 
             if s.structureID in current_hash:
                 cs = current_hash[s.structureID]
