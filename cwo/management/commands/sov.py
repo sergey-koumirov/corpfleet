@@ -31,7 +31,7 @@ class Command(BaseCommand):
                 cs = current_hash[s.structureID]
                 defence = Decimal(s.vulnerabilityOccupancyLevel if 'vulnerabilityOccupancyLevel' in s.data else 0).quantize(Decimal('.01'))
                 if s.alliance.id != cs.alliance_id or defence != cs.defence:
-                    print('existing structure {} changed A: {}>{}  D: {}>{}'.format(s.structureID, s.alliance.id, cs.alliance_id, defence, cs.defence))
+                    print('existing structure {} changed A: {}>{}  D: {}>{}'.format(s.structureID, cs.alliance_id, s.alliance.id, cs.defence, defence))
                     cs.date2 = self.today
                     cs.save()
                     self.import_from_dict(s)
