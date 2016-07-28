@@ -18,27 +18,6 @@ class Structure(models.Model):
     date1 = models.DateTimeField()
     date2 = models.DateTimeField()
 
-    def import_from_dict(today, end_of_time, structure):
-        try:
-            defence = structure.vulnerabilityOccupancyLevel if 'vulnerabilityOccupancyLevel' in structure.data else 0
-
-            new = Structure(
-                alliance_id=structure.alliance.id,
-                defence=defence,
-                structure_id=structure.structureID,
-                system_id=structure.solarSystem.id,
-                type_id=structure.type.id,
-                date1=today,
-                date2=end_of_time
-            )
-            new.save()
-        except:
-            pprint.pprint(structure.data)
-            pprint.pprint(type(structure.data))
-            pprint.pprint('vulnerabilityOccupancyLevel' in structure.data)
-            pprint.pprint('alliance' in structure.data)
-            raise
-
     def __str__(self):
         return "[{}]".format(self.id)
 
