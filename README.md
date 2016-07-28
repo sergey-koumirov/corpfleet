@@ -9,4 +9,5 @@ python3 manage.py makemigrations --empty cwo
 
 pip3 install mysqlclient
 pip3 install sqlparse
+pip3 install preston
 
