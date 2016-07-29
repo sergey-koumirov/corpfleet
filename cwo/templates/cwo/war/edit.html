@@ -3,6 +3,24 @@
 
 {% block content %}
 
+<script>
+  $( function() {
+
+
+      $( "#search" ).autocomplete({
+          source: "/wars/alliances",
+          minLength: 2,
+          select: function( event, ui ) {
+              console.debug(ui.item);
+              console.debug('selected');
+          }
+      }).autocomplete("instance")._renderItem = function( ul, item ) {
+          return $( "<li>" ).append( "<div>" + item.name + "</div>" ).appendTo( ul );
+      };
+
+  } );
+</script>
+
 <h4><a href="{% url 'cwo:war_index' %}">Wars</a> / New</h4>
 
 <div class="row">
