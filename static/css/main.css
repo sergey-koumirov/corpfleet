@@ -1,0 +1,9 @@
+.border {
+    border: 1px solid #808080;
+    padding: 3px;
+
+}
+
+.min-height{
+    min-height: 400px;
+}

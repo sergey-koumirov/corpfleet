@@ -17,3 +17,11 @@ def war_new(request):
         'war': war
     }
     return render(request, 'cwo/war/edit.html', context)
+
+
+def war_create(request):
+    try:
+        raw_data = RawData.objects.get(pk=raw_data_id)
+    except RawData.DoesNotExist:
+        raise Http404("Question does not exist")
+    return render(request, 'cta/show.html', {'raw_data': raw_data})
