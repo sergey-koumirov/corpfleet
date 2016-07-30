@@ -7,3 +7,7 @@
 .min-height{
     min-height: 400px;
 }
+
+.errorlist li{
+  color: #ff0000;
+}

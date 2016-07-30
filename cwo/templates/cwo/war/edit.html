@@ -21,39 +21,37 @@
   } );
 </script>
 
-<h4><a href="{% url 'cwo:war_index' %}">Wars</a> / New</h4>
+<h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ war.name.value }}</h4>
 
 <div class="row">
     <div class="col-md-6">
-        <form action="{% url 'cwo:war_create' %}">
+        <form action="{% url 'cwo:war_update' war.instance.id %}" method="post">
             {% csrf_token %}
+            {{ war.non_field_errors }}
             <div class="form-group">
-                <label for="name">Name</label>
-                <input type="text" class="form-control" id="name" value="{{ war.name }}">
+                <label for="{{ war.name.id_for_label }}">Name: {{ war.name.errors }}</label>
+                <input type="text" class="form-control" id="{{ war.name.id_for_label }}" name="{{ war.name.html_name }}" value="{{ war.name.value }}" />
             </div>
-
-            <button type="submit" class="btn btn-default">Save</button>
+            <input type="submit" class="btn btn-default" value="Save"/>
         </form>
     </div>
 </div>
 
 <hr/>
 
-{% if war.id %}
-    <div class="row">
-        <div class="col-md-2 min-height border">
-            <input type="text" class="form-control" id="search" placeholder="Alliance name">
-        </div>
+<div class="row">
+    <div class="col-md-2 min-height border">
+        <input type="text" class="form-control" id="search" placeholder="Alliance name">
+    </div>
 
-        <div class="col-md-10 min-height border">
-            <div class="col-md-6">
-                <input type="text" class="form-control" id="war-side" placeholder="War side name">
-            </div>
-            <div class="col-md-2">
-                <button class="btn btn-default">Add</button>
-            </div>
+    <div class="col-md-10 min-height border">
+        <div class="col-md-6">
+            <input type="text" class="form-control" id="war-side" placeholder="War side name">
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-default">Add</button>
         </div>
     </div>
-{% endif %}
+</div>
 
 {% endblock %}

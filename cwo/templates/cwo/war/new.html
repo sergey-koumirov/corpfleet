@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<h4><a href="{% url 'cwo:war_index' %}">Wars</a> / New</h4>
+
+<div class="row">
+    <div class="col-md-6">
+        <form action="{% url 'cwo:war_create' %}" method="post">
+            {% csrf_token %}
+            {{ war.non_field_errors }}
+            <div class="form-group">
+                <label for="{{ war.name.id_for_label }}">Name: {{ war.name.errors }}</label>
+                <input type="text" class="form-control" id="{{ war.name.id_for_label }}" name="{{ war.name.html_name }}" value="{{ war.name.value }}" />
+            </div>
+            <input type="submit" class="btn btn-default" value="Save"/>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

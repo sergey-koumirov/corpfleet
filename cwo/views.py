@@ -1,9 +1,13 @@
 from django.shortcuts import render
+from django.shortcuts import redirect
 from django.http import Http404
 from django.http import HttpResponse
 from .models import War
 from .models import Alliance
+from .forms import WarForm
 import json
+import datetime
+
 
 def war_index(request):
     wars = War.objects.order_by('-id').all()
@@ -15,10 +19,20 @@ def war_index(request):
 
 def war_new(request):
     war = War()
+    war.name = '[ {0:%Y-%m-%d %H:%M:%S} ] Red vs Blue'.format(datetime.datetime.now())
     context = {
-        'war': war
+        'war': WarForm(instance=war)
     }
-    return render(request, 'cwo/war/edit.html', context)
+    return render(request, 'cwo/war/new.html', context)
+
+
+def war_create(request):
+    war = WarForm(request.POST)
+    if war.is_valid():
+        war.save()
+        return redirect('cwo:war_edit', war.instance.id)
+    else:
+        return render(request, 'cwo/war/new.html', {'war': war})
 
 
 def war_edit(request, war_id):
@@ -26,15 +40,21 @@ def war_edit(request, war_id):
         war = War.objects.get(pk=war_id)
     except War.DoesNotExist:
         raise Http404("War does not exist")
-    return render(request, 'cwo/war/edit.html', {'war': war})
+    return render(request, 'cwo/war/edit.html', {'war': WarForm(instance=war)})
 
 
-def war_create(request):
+def war_update(request, war_id):
     try:
-        raw_data = War.objects.get(pk=1)
+        instance = War.objects.get(pk=war_id)
+        war = WarForm(request.POST, instance=instance)
+        if war.is_valid():
+            war.save()
+            return redirect('cwo:war_edit', war.instance.id)
+        else:
+            return render(request, 'cwo/war/edit.html', {'war': war})
+
     except War.DoesNotExist:
-        raise Http404("Question does not exist")
-    return render(request, 'cta/show.html', {'raw_data': raw_data})
+        raise Http404("War does not exist")
 
 
 def war_alliances(request):
