@@ -3,43 +3,33 @@
 
 {% block content %}
 
-<script>
-  $( function() {
+<script src="{% static 'angular.min.js' %}"></script>
+<script src="{% static 'angular-jquery-autocomplete.js' %}"></script>
+<script src="{% static 'war.controller.js' %}"></script>
 
-
-      $( "#search" ).autocomplete({
-          source: "/wars/alliances",
-          minLength: 2,
-          select: function( event, ui ) {
-              console.debug(ui.item);
-              console.debug('selected');
-          }
-      }).autocomplete("instance")._renderItem = function( ul, item ) {
-          return $( "<li>" ).append( "<div>" + item.name + "</div>" ).appendTo( ul );
-      };
-
-  } );
-</script>
 
 <h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ war.name.value }}</h4>
 
 <div class="row">
     <div class="col-md-6">
-        <form action="{% url 'cwo:war_update' war.instance.id %}" method="post">
+        <form class="form-inline" action="{% url 'cwo:war_update' war.instance.id %}" method="post">
             {% csrf_token %}
             {{ war.non_field_errors }}
             <div class="form-group">
                 <label for="{{ war.name.id_for_label }}">Name: {{ war.name.errors }}</label>
-                <input type="text" class="form-control" id="{{ war.name.id_for_label }}" name="{{ war.name.html_name }}" value="{{ war.name.value }}" />
+                <input type="text" size=50 class="form-control" id="{{ war.name.id_for_label }}" name="{{ war.name.html_name }}" value="{{ war.name.value }}" />
             </div>
             <input type="submit" class="btn btn-default" value="Save"/>
         </form>
+    </div>
+    <div class="col-md-6 text-right">
+        <a href="{% url 'cwo:war_delete' war.instance.id %}" class="btn btn-default" onclick="return confirm('Are you sure you want to delete this?')">Delete</a>
     </div>
 </div>
 
 <hr/>
 
-<div class="row">
+<div class="row" ng-app="warApp" ng-controller="WarCtrl" ng-init="init( {{war.instance.id}} )">
     <div class="col-md-2 min-height border">
         <input type="text" class="form-control" id="search" placeholder="Alliance name">
     </div>

@@ -57,6 +57,15 @@ def war_update(request, war_id):
         raise Http404("War does not exist")
 
 
+def war_delete(request, war_id):
+    try:
+        instance = War.objects.get(pk=war_id)
+        instance.delete()
+        return redirect('cwo:war_index')
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+
 def war_alliances(request):
     q = request.GET.get('term', '')
     alliances = []
