@@ -66,6 +66,14 @@ def war_delete(request, war_id):
         raise Http404("War does not exist")
 
 
+def add_war_side(request, war_id):
+    try:
+        instance = War.objects.get(pk=war_id)
+        return HttpResponse(json.dumps({'s': 1}), content_type="application/json")
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+
 def war_alliances(request):
     q = request.GET.get('term', '')
     alliances = []

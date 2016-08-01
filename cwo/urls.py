@@ -13,5 +13,7 @@ urlpatterns = [
     url(r'^(?P<war_id>[0-9]+)/update$', views.war_update, name='war_update'),
     url(r'^(?P<war_id>[0-9]+)/delete$', views.war_delete, name='war_delete'),
 
+    url(r'^(?P<war_id>[0-9]+)/add_war_side$', views.add_war_side, name='add_war_side'),
+
     url(r'^alliances$', views.war_alliances,    name='war_alliances'),
 ]
