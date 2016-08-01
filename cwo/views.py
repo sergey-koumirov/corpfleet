@@ -68,7 +68,8 @@ def war_delete(request, war_id):
 
 def add_war_side(request, war_id):
     try:
-        instance = War.objects.get(pk=war_id)
+        war = War.objects.get(pk=war_id)
+        war.participant_set.create(name=request.POST.get('name', ''))
         return HttpResponse(json.dumps({'s': 1}), content_type="application/json")
     except War.DoesNotExist:
         raise Http404("War does not exist")
