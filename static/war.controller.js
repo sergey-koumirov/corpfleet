@@ -19,9 +19,6 @@ warApp.controller('WarCtrl', function ($scope, $http) {
             data: {
                 name: name
             },
-            headers: {
-                'X-CSRFToken': $scope.csrfmiddlewaretoken
-            },
             success: function(data) {
                 console.debug('success');
             }
