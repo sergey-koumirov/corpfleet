@@ -4,7 +4,7 @@ angular.module('angular-jquery-autocomplete', []).directive('autocomplete', func
         restrict: 'EA',
         scope: {
             resultId: '=',
-            oreOnly: '='
+            url: '@'
         },
 
         link: function (scope, elem, attr, ctrl) {
@@ -12,20 +12,22 @@ angular.module('angular-jquery-autocomplete', []).directive('autocomplete', func
             var config = {
                 source: function( request, response ) {
                     $.ajax({
-                      url: "/wars/alliances",
+                      url: scope.url,
                       data: {
-                        term: request.term,
-                        ore: scope.oreOnly
+                        term: request.term
                       },
                       success: function( data ) {
                         response( data );
                       }
                     });
                 },
-                minLength: 3,
+                minLength: 1,
                 select: function (event, ui) {
                     this.value = ui.item.name;
                     scope.resultId = ui.item.id;
+
+                    console.debug(scope.resultId);
+
                     scope.$apply();
                     return false;
                 },

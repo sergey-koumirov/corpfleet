@@ -11,7 +11,8 @@ class War(models.Model):
     def info(self):
         return {
             'name': self.name,
-            'participants': [p.info() for p in self.participant_set.all()]
+            'participants': [p.info() for p in self.participant_set.all()],
+            'territories': [t.info() for t in self.territory_set.all()]
         }
 
 
@@ -42,11 +43,16 @@ class ParticipantAlliance(models.Model):
 
 class Territory(models.Model):
     id = models.AutoField(primary_key=True)
-    war_id = models.BigIntegerField()
     name = models.CharField(max_length=200)
+    war = models.ForeignKey(War, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return "[{}] {}".format(self.id, self.name)
+
+    def info(self):
+        return {
+            'name': self.name,
+        }
 
 
 class TerritoryRegion(models.Model):

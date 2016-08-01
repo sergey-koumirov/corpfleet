@@ -30,20 +30,46 @@
 <hr/>
 
 <div class="row" ng-app="warApp" ng-controller="WarCtrl" ng-init="init( {{war.instance.id}} )">
-    <div class="col-md-2 min-height border">
-        <input type="text" class="form-control" id="search" placeholder="Alliance name">
-    </div>
 
-    <div class="col-md-10 min-height border">
+    <div class="col-md-12">
+        <h3>War Sides</h3>
         <div class="col-md-12 form-inline">
             <input type="text" size=40 class="form-control" ng-model="newWarSide" placeholder="War side name">
             <button class="btn btn-default" ng-click="AddWarSide()">Add</button>
+            <hr>
         </div>
+        <div class="col-md-12">
+            <table class="table table-bordered table-condensed" ng-repeat="participant in war.participants">
+                <tr>
+                    <td class="col-md-3">{? participant.name ?}</td>
+                    <td class="form-inline">
+                        <input type="text" size=40 class="form-control" placeholder="Alliance name">
+                        <input type="text" class="form-control" placeholder="Date 1">
+                        <input type="text" class="form-control" placeholder="Date 2">
+                        <button class="btn btn-default">Add</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <h3>Territories</h3>
         <div class="col-md-12 form-inline">
-            <ul>
-                <li ng-repeat="participant in war.participants">{? participant.name ?}</li>
-            </ul>
+            <input type="text" size=40 class="form-control" ng-model="newTerritory" placeholder="Territory">
+            <button class="btn btn-default" ng-click="AddTerritory()">Add</button>
+            <hr>
         </div>
+        <div class="col-md-12">
+            <table class="table table-bordered table-condensed" ng-repeat="territory in war.territories">
+                <tr>
+                    <td class="col-md-3">{? territory.name ?}</td>
+                    <td class="form-inline">
+                        <input type="text" size=40 class="form-control" placeholder="Region name">
+                        <button class="btn btn-default">Add</button>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
     </div>
 </div>
 

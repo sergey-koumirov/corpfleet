@@ -4,6 +4,7 @@ from django.http import Http404
 from django.http import HttpResponse
 from .models import War
 from .models import Alliance
+from .models import Region
 from .forms import WarForm
 import json
 import datetime
@@ -76,6 +77,16 @@ def add_war_side(request, war_id):
         raise Http404("War does not exist")
 
 
+def add_territory(request, war_id):
+    try:
+        json_data = json.loads(request.body.decode("utf-8"))
+        war = War.objects.get(pk=war_id)
+        war.territory_set.create(name=json_data['name'])
+        return HttpResponse(json.dumps(war.info()), content_type="application/json")
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+
 def info(request, war_id):
     try:
         war = War.objects.get(pk=war_id)
@@ -90,3 +101,11 @@ def war_alliances(request):
     for r in Alliance.objects.filter(name__icontains=q).order_by('name')[:10]:
         alliances.append({'id': r.id, 'name': r.name})
     return HttpResponse(json.dumps(alliances), content_type="application/json")
+
+
+def war_regions(request):
+    q = request.GET.get('term', '')
+    regions = []
+    for r in Region.objects.filter(name__icontains=q).order_by('name')[:10]:
+        regions.append({'id': r.id, 'name': r.name})
+    return HttpResponse(json.dumps(regions), content_type="application/json")
