@@ -35,9 +35,14 @@
     </div>
 
     <div class="col-md-10 min-height border">
-        <div class="col-md-10 form-inline">
+        <div class="col-md-12 form-inline">
             <input type="text" size=40 class="form-control" ng-model="newWarSide" placeholder="War side name">
             <button class="btn btn-default" ng-click="AddWarSide()">Add</button>
+        </div>
+        <div class="col-md-12 form-inline">
+            <ul>
+                <li ng-repeat="participant in war.participants">{? participant.name ?}</li>
+            </ul>
         </div>
     </div>
 </div>

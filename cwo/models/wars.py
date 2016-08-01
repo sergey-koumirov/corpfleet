@@ -8,6 +8,12 @@ class War(models.Model):
     def __str__(self):
         return "[{}] {}".format(self.id, self.name)
 
+    def info(self):
+        return {
+            'name': self.name,
+            'participants': [p.info() for p in self.participant_set.all()]
+        }
+
 
 class Participant(models.Model):
     id = models.AutoField(primary_key=True)
@@ -16,6 +22,11 @@ class Participant(models.Model):
 
     def __str__(self):
         return "[{}] {}".format(self.id, self.name)
+
+    def info(self):
+        return {
+            'name': self.name,
+        }
 
 
 class ParticipantAlliance(models.Model):
