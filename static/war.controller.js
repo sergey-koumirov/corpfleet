@@ -18,13 +18,20 @@ warApp.controller('WarCtrl', function ($scope, $http) {
         });
     };
 
-    $scope.AddWarSide = function(){
+    $scope.AddParticipant = function(){
         $http.post(
-            '/wars/'+$scope.warId+'/add_war_side',
+            '/wars/'+$scope.warId+'/add_participant',
             {name: $scope.newWarSide}
         ).success(function(data) {
             $scope.war = data;
             $scope.newWarSide = null;
+        });
+    };
+    $scope.DeleteParticipant = function(warId, participantId){
+        $http.post(
+            '/wars/'+warId+'/participant/'+participantId+'/delete'
+        ).success(function(data) {
+            $scope.war = data;
         });
     };
 
@@ -43,6 +50,13 @@ warApp.controller('WarCtrl', function ($scope, $http) {
             participant.newDate2 = null;
         });
     };
+    $scope.DeleteAlliance = function(warId, participantId, participantAllianceId){
+        $http.post(
+            '/wars/'+warId+'/participant/'+participantId+'/alliance/'+participantAllianceId+'/delete'
+        ).success(function(data) {
+            $scope.war = data;
+        });
+    };
 
     $scope.AddTerritory = function(){
         $http.post(
@@ -51,6 +65,13 @@ warApp.controller('WarCtrl', function ($scope, $http) {
         ).success(function(data) {
             $scope.war = data;
             $scope.newTerritory = null;
+        });
+    };
+    $scope.DeleteTerritory = function(warId, territoryId){
+        $http.post(
+            '/wars/'+warId+'/territory/'+territoryId+'/delete'
+        ).success(function(data) {
+            $scope.war = data;
         });
     };
 
@@ -63,7 +84,6 @@ warApp.controller('WarCtrl', function ($scope, $http) {
             territory.newRegionId = null;
         });
     };
-
     $scope.DeleteRegion = function(warId, territoryId, territoryRegionId){
         $http.post(
             '/wars/'+warId+'/territory/'+territoryId+'/region/'+territoryRegionId+'/delete'

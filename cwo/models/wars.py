@@ -36,10 +36,8 @@ class Participant(models.Model):
 
 class ParticipantAlliance(models.Model):
     id = models.AutoField(primary_key=True)
-
     participant = models.ForeignKey(Participant, on_delete=models.CASCADE, null=True)
     alliance = models.ForeignKey(Alliance, on_delete=models.CASCADE, null=True)
-
     date1 = models.DateTimeField()
     date2 = models.DateTimeField()
 
@@ -48,6 +46,7 @@ class ParticipantAlliance(models.Model):
 
     def info(self):
         return {
+            'id': self.id,
             'alliance_id': self.alliance_id,
             'alliance_name': self.alliance.name,
             'date1': self.date1.strftime ('%Y-%m-%d %H:%M:%S'),

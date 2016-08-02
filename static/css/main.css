@@ -1,3 +1,11 @@
+body{
+    font-size: 12px;
+}
+
+td{
+    font-size: 12px;
+}
+
 .border {
     border: 1px solid #808080;
     padding: 3px;
@@ -11,7 +19,7 @@
   color: #ff0000;
 }
 
-.region {
+.btn-my {
   margin-right: 10px;
   color: #FFFFFF;
   background: #65B0BC;

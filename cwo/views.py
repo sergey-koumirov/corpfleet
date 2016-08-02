@@ -67,11 +67,21 @@ def war_delete(request, war_id):
         raise Http404("War does not exist")
 
 
-def add_war_side(request, war_id):
+def add_participant(request, war_id):
     try:
         json_data = json.loads(request.body.decode("utf-8"))
         war = War.objects.get(pk=war_id)
         war.participant_set.create(name=json_data['name'])
+        return HttpResponse(json.dumps(war.info()), content_type="application/json")
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+
+def delete_participant(request, war_id, participant_id):
+    try:
+        war = War.objects.get(pk=war_id)
+        participant = war.participant_set.get(pk=participant_id)
+        participant.delete()
         return HttpResponse(json.dumps(war.info()), content_type="application/json")
     except War.DoesNotExist:
         raise Http404("War does not exist")
@@ -94,11 +104,32 @@ def add_alliance(request, war_id, participant_id):
         raise Http404("War does not exist")
 
 
+def delete_alliance(request, war_id, participant_id, pa_id):
+    try:
+        war = War.objects.get(pk=war_id)
+        participant = war.participant_set.get(pk=participant_id)
+        pa = participant.participantalliance_set.get(pk=pa_id)
+        pa.delete()
+        return HttpResponse(json.dumps(war.info()), content_type="application/json")
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+
 def add_territory(request, war_id):
     try:
         json_data = json.loads(request.body.decode("utf-8"))
         war = War.objects.get(pk=war_id)
         war.territory_set.create(name=json_data['name'])
+        return HttpResponse(json.dumps(war.info()), content_type="application/json")
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+
+def delete_territory(request, war_id, territory_id):
+    try:
+        war = War.objects.get(pk=war_id)
+        territory = war.territory_set.get(pk=territory_id)
+        territory.delete()
         return HttpResponse(json.dumps(war.info()), content_type="application/json")
     except War.DoesNotExist:
         raise Http404("War does not exist")
