@@ -28,6 +28,22 @@ warApp.controller('WarCtrl', function ($scope, $http) {
         });
     };
 
+    $scope.AddAlliance = function(participant){
+        $http.post(
+            '/wars/'+$scope.warId+'/participant/'+participant.id+'/add_alliance',
+            {
+                id: participant.newAllianceId,
+                date1: participant.newDate1,
+                date2: participant.newDate2
+            }
+        ).success(function(data) {
+            $scope.war = data;
+            participant.newAllianceId = null;
+            participant.newDate1 = null;
+            participant.newDate2 = null;
+        });
+    };
+
     $scope.AddTerritory = function(){
         $http.post(
             '/wars/'+$scope.warId+'/add_territory',

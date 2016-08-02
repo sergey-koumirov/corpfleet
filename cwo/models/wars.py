@@ -1,5 +1,6 @@
 from django.db import models
 from cwo.models import Region
+from cwo.models import Alliance
 
 
 class War(models.Model):
@@ -27,19 +28,31 @@ class Participant(models.Model):
 
     def info(self):
         return {
-            'name': self.name
+            'id': self.id,
+            'name': self.name,
+            'alliances': [pa.info() for pa in self.participantalliance_set.all()]
         }
 
 
 class ParticipantAlliance(models.Model):
     id = models.AutoField(primary_key=True)
-    participant_id = models.BigIntegerField()
-    alliance_id = models.BigIntegerField()
+
+    participant = models.ForeignKey(Participant, on_delete=models.CASCADE, null=True)
+    alliance = models.ForeignKey(Alliance, on_delete=models.CASCADE, null=True)
+
     date1 = models.DateTimeField()
     date2 = models.DateTimeField()
 
     def __str__(self):
         return "[{}]".format(self.id)
+
+    def info(self):
+        return {
+            'alliance_id': self.alliance_id,
+            'alliance_name': self.alliance.name,
+            'date1': self.date1.strftime ('%Y-%m-%d %H:%M:%S'),
+            'date2': self.date2.strftime ('%Y-%m-%d %H:%M:%S')
+        }
 
 
 class Territory(models.Model):

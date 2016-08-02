@@ -43,11 +43,15 @@
                 <tr>
                     <td class="col-md-3">{? participant.name ?}</td>
                     <td class="form-inline">
-                        <input type="text" size=40 class="form-control" placeholder="Alliance name">
-                        <input type="text" class="form-control" placeholder="Date 1">
-                        <input type="text" class="form-control" placeholder="Date 2">
-                        <button class="btn btn-default">Add</button>
+                        <input type="text" size=40 class="form-control" placeholder="Alliance name" autocomplete result-id="participant.newAllianceId" url="/wars/alliances">
+                        <input type="text" class="form-control" placeholder="Date 1" ng-model="participant.newDate1">
+                        <input type="text" class="form-control" placeholder="Date 2" ng-model="participant.newDate2">
+                        <button class="btn btn-default" ng-click="AddAlliance(participant)">Add</button>
                     </td>
+                </tr>
+                <tr ng-repeat="alliance in participant.alliances">
+                    <td></td>
+                    <td>{? alliance.alliance_name ?} {? alliance.date1 ?} - {? alliance.date2 ?}</td>
                 </tr>
             </table>
         </div>

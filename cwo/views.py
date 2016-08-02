@@ -77,6 +77,23 @@ def add_war_side(request, war_id):
         raise Http404("War does not exist")
 
 
+def add_alliance(request, war_id, participant_id):
+    try:
+        json_data = json.loads(request.body.decode("utf-8"))
+        war = War.objects.get(pk=war_id)
+        participant = war.participant_set.get(pk=participant_id)
+        alliance = Alliance.objects.get(pk=json_data['id'])
+        participant.participantalliance_set.create(
+            participant=participant,
+            alliance=alliance,
+            date1=json_data['date1'],
+            date2=json_data['date2']
+        )
+        return HttpResponse(json.dumps(war.info()), content_type="application/json")
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+
 def add_territory(request, war_id):
     try:
         json_data = json.loads(request.body.decode("utf-8"))
