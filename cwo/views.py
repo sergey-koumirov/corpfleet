@@ -87,6 +87,18 @@ def add_territory(request, war_id):
         raise Http404("War does not exist")
 
 
+def add_region(request, war_id, territory_id):
+    try:
+        json_data = json.loads(request.body.decode("utf-8"))
+        war = War.objects.get(pk=war_id)
+        territory = war.territory_set.get(pk=territory_id)
+        region = Region.objects.get(pk=json_data['id'])
+        territory.territoryregion_set.create(territory=territory, region=region)
+        return HttpResponse(json.dumps(war.info()), content_type="application/json")
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+
 def info(request, war_id):
     try:
         war = War.objects.get(pk=war_id)

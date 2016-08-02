@@ -38,5 +38,18 @@ warApp.controller('WarCtrl', function ($scope, $http) {
         });
     };
 
+    $scope.AddRegion = function(territory){
+        console.debug(territory);
+        $http.post(
+            '/wars/'+$scope.warId+'/territory/'+territory.id+'/add_region',
+            {id: territory.newRegionId}
+        ).success(function(data) {
+            $scope.war = data;
+            territory.newRegionId = null;
+        });
+    };
+
+
+
 
 });

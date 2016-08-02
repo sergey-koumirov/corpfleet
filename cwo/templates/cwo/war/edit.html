@@ -63,9 +63,13 @@
                 <tr>
                     <td class="col-md-3">{? territory.name ?}</td>
                     <td class="form-inline">
-                        <input type="text" size=40 class="form-control" placeholder="Region name">
-                        <button class="btn btn-default">Add</button>
+                        <input type="text" size=40 class="form-control" placeholder="Region name" autocomplete result-id="territory.newRegionId" url="/wars/regions">
+                        <button class="btn btn-default" ng-click="AddRegion(territory)">Add</button>
                     </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><span ng-repeat="region in territory.regions">{? region.region_name ?}</span></td>
                 </tr>
             </table>
         </div>
