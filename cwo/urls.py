@@ -18,6 +18,7 @@ urlpatterns = [
 
     url(r'^(?P<war_id>[0-9]+)/add_territory$', views.add_territory, name='add_territory'),
     url(r'^(?P<war_id>[0-9]+)/territory/(?P<territory_id>[0-9]+)/add_region', views.add_region, name='add_region'),
+    url(r'^(?P<war_id>[0-9]+)/territory/(?P<territory_id>[0-9]+)/region/(?P<tr_id>[0-9]+)', views.delete_region, name='delete_region'),
 
     url(r'^(?P<war_id>[0-9]+)/info$', views.info, name='info'),
 

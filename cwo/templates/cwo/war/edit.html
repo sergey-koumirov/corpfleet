@@ -73,7 +73,12 @@
                 </tr>
                 <tr>
                     <td></td>
-                    <td><span ng-repeat="region in territory.regions">{? region.region_name ?}</span></td>
+                    <td>
+                        <span class="region" ng-repeat="region in territory.regions">
+                            {? region.region_name ?}
+                            <span class="delete" ng-click="DeleteRegion({{war.instance.id}},territory.id,region.id)">X</span>
+                        </span>
+                    </td>
                 </tr>
             </table>
         </div>

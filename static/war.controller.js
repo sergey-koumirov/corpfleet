@@ -55,7 +55,6 @@ warApp.controller('WarCtrl', function ($scope, $http) {
     };
 
     $scope.AddRegion = function(territory){
-        console.debug(territory);
         $http.post(
             '/wars/'+$scope.warId+'/territory/'+territory.id+'/add_region',
             {id: territory.newRegionId}
@@ -65,7 +64,13 @@ warApp.controller('WarCtrl', function ($scope, $http) {
         });
     };
 
-
+    $scope.DeleteRegion = function(warId, territoryId, territoryRegionId){
+        $http.post(
+            '/wars/'+warId+'/territory/'+territoryId+'/region/'+territoryRegionId+'/delete'
+        ).success(function(data) {
+            $scope.war = data;
+        });
+    };
 
 
 });

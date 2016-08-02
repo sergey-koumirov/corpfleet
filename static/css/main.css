@@ -1,7 +1,6 @@
 .border {
     border: 1px solid #808080;
     padding: 3px;
-
 }
 
 .min-height{
@@ -10,4 +9,18 @@
 
 .errorlist li{
   color: #ff0000;
+}
+
+.region {
+  margin-right: 10px;
+  color: #FFFFFF;
+  background: #65B0BC;
+  padding: 4px;
+  border: solid 1px #000000;
+  border-radius: 5px;
+}
+
+.delete{
+  cursor: pointer;
+  color: #25606C;
 }

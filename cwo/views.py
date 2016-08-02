@@ -116,6 +116,17 @@ def add_region(request, war_id, territory_id):
         raise Http404("War does not exist")
 
 
+def delete_region(request, war_id, territory_id, tr_id):
+    try:
+        war = War.objects.get(pk=war_id)
+        territory = war.territory_set.get(pk=territory_id)
+        tr = territory.territoryregion_set.get(pk=tr_id)
+        tr.delete()
+        return HttpResponse(json.dumps(war.info()), content_type="application/json")
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+
 def info(request, war_id):
     try:
         war = War.objects.get(pk=war_id)

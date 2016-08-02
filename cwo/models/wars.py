@@ -81,6 +81,7 @@ class TerritoryRegion(models.Model):
 
     def info(self):
         return {
+            'id': self.id,
             'region_id': self.region_id,
             'region_name': self.region.name
         }
