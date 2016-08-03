@@ -9,7 +9,7 @@
 {% if wars %}
 <ul>
     {% for war in wars %}
-    <li><a href="{% url 'cwo:war_edit' war.id %}">{{ war.name }}</a></li>
+    <li>{{ war.name }} ( <a href="{% url 'cwo:war_edit' war.id %}">Edit</a> | <a href="{% url 'cwo:war_dashboard' war.id %}">Powers & Maps</a> )</li>
     {% endfor %}
 </ul>
 {% else %}

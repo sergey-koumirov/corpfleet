@@ -29,3 +29,12 @@ class Region(models.Model):
 
     def __str__(self):
         return "[{}] {}".format(self.id, self.name)
+
+
+class Gate(models.Model):
+    id = models.BigIntegerField(primary_key=True)
+    system_from_id = models.BigIntegerField()
+    system_to_id = models.BigIntegerField()
+
+    def __str__(self):
+        return "[{}]".format(self.id)

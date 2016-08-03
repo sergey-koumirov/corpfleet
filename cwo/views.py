@@ -196,3 +196,10 @@ def war_regions(request):
     for r in Region.objects.filter(name__icontains=q).order_by('name')[:10]:
         regions.append({'id': r.id, 'name': r.name})
     return HttpResponse(json.dumps(regions), content_type="application/json")
+
+def war_dashboard(request, war_id):
+    try:
+        war = War.objects.get(pk=war_id)
+        return render(request, 'cwo/war/dashboard.html', {'war': war})
+    except War.DoesNotExist:
+        raise Http404("War does not exist")

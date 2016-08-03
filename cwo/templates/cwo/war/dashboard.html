@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ war.name }} / Powers & Maps</h4>
+
+<svg viewBox="-50 -50 100 100" width="600" height="600">
+    <circle cx="0" cy="0" r="40" stroke="#808080" stroke-width="1" fill="#CCCCCC" />
+    <line x1="0" y1="0" x2="200" y2="200" vector-effect="non-scaling-stroke" style="stroke:rgb(255,0,0);stroke-width:1" />
+</svg>
+
+{% endblock %}
