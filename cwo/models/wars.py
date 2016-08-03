@@ -22,6 +22,7 @@ class Participant(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200)
     war = models.ForeignKey(War, on_delete=models.CASCADE, null=True)
+    color = models.CharField(max_length=7, null=True)
 
     def __str__(self):
         return "[{}] {}".format(self.id, self.name)
@@ -30,6 +31,7 @@ class Participant(models.Model):
         return {
             'id': self.id,
             'name': self.name,
+            'color': self.color,
             'alliances': [pa.info() for pa in self.participantalliance_set.all()]
         }
 

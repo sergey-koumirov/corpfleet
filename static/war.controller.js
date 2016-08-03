@@ -8,6 +8,7 @@ var warApp = angular.module('warApp', ['angular-jquery-autocomplete']).config(fu
 warApp.controller('WarCtrl', function ($scope, $http, $filter) {
 
     $scope.newWarSide = null;
+    $scope.newWarSideColor =  "#" + Math.random().toString(16).slice(2, 8);
     $scope.newTerritory = null;
     $scope.war = {};
     $scope.todayStr = $filter('date')(new Date(), 'yyyy-MM-dd');
@@ -21,12 +22,14 @@ warApp.controller('WarCtrl', function ($scope, $http, $filter) {
     };
 
     $scope.AddParticipant = function(){
+        console.debug($scope.newWarSideColor)
         $http.post(
             '/wars/'+$scope.warId+'/add_participant',
-            {name: $scope.newWarSide}
+            {name: $scope.newWarSide, color: $scope.newWarSideColor}
         ).success(function(data) {
             $scope.war = data;
             $scope.newWarSide = null;
+            $scope.newWarSideColor = "#" + Math.random().toString(16).slice(2, 8);
         });
     };
     $scope.DeleteParticipant = function(warId, participantId){

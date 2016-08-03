@@ -35,12 +35,13 @@
         <h3>War Sides</h3>
         <div class="col-md-12 form-inline">
             <input type="text" size=40 class="form-control input-sm" ng-model="newWarSide" placeholder="War side name">
+            <input type="color" class="input-sm" ng-model="newWarSideColor">
             <button class="btn btn-default btn-sm" ng-click="AddParticipant()" ng-disabled="!newWarSide">Add</button>
             <hr>
         </div>
         <div class="col-md-12">
             <table class="table-condensed" ng-repeat="participant in war.participants">
-                <tr>
+                <tr style="border: 2px solid {? participant.color ?}">
                     <td class="col-md-3">
                         <span class="btn-my delete" ng-click="DeleteParticipant({{war.instance.id}},participant.id)">X</span>
                         {? participant.name ?}

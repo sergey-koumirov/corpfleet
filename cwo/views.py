@@ -71,7 +71,7 @@ def add_participant(request, war_id):
     try:
         json_data = json.loads(request.body.decode("utf-8"))
         war = War.objects.get(pk=war_id)
-        war.participant_set.create(name=json_data['name'])
+        war.participant_set.create(name=json_data['name'], color=json_data['color'])
         return HttpResponse(json.dumps(war.info()), content_type="application/json")
     except War.DoesNotExist:
         raise Http404("War does not exist")
