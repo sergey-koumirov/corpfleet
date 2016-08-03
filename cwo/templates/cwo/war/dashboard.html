@@ -5,9 +5,16 @@
 
 <h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ war.name }} / Powers & Maps</h4>
 
-<svg viewBox="-50 -50 100 100" width="600" height="600">
-    <circle cx="0" cy="0" r="40" stroke="#808080" stroke-width="1" fill="#CCCCCC" />
-    <line x1="0" y1="0" x2="200" y2="200" vector-effect="non-scaling-stroke" style="stroke:rgb(255,0,0);stroke-width:1" />
+<svg viewBox="-10 -10 1100 1100" width="1000" height="1000" style="border: 1px solid #404040">
+
+    {% for system in war.statistics.systems %}
+    <circle cx="{{system.sx|floatformat}}" cy="{{system.sz|floatformat}}" r="5" stroke="#808080" stroke-width="1" fill="#CCCCCC" />
+    {% endfor %}
+
+    {% for system in war.statistics.systems %}
+    <text x="{{system.sx|floatformat}}" dx="10" y="{{system.sz|floatformat}}" dy="4">{{system.name}}</text>
+    {% endfor %}
+
 </svg>
 
 {% endblock %}

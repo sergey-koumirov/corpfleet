@@ -200,6 +200,6 @@ def war_regions(request):
 def war_dashboard(request, war_id):
     try:
         war = War.objects.get(pk=war_id)
-        return render(request, 'cwo/war/dashboard.html', {'war': war})
+        return render(request, 'cwo/war/dashboard.html', {'war': war, 'border': war.minmax()})
     except War.DoesNotExist:
         raise Http404("War does not exist")
