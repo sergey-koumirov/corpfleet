@@ -57,6 +57,17 @@ warApp.controller('WarCtrl', function ($scope, $http) {
             $scope.war = data;
         });
     };
+    $scope.UpdateAlliance = function(warId, participantId, participantAlliance){
+        $http.post(
+            '/wars/'+warId+'/participant/'+participantId+'/alliance/'+participantAlliance.id+'/update',
+            {
+                date1: participantAlliance.date1,
+                date2: participantAlliance.date2
+            }
+        ).success(function(data) {
+            $scope.war = data;
+        });
+    };
 
     $scope.AddTerritory = function(){
         $http.post(

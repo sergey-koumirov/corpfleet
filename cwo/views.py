@@ -115,6 +115,22 @@ def delete_alliance(request, war_id, participant_id, pa_id):
         raise Http404("War does not exist")
 
 
+def update_alliance(request, war_id, participant_id, pa_id):
+    try:
+        war = War.objects.get(pk=war_id)
+        participant = war.participant_set.get(pk=participant_id)
+        pa = participant.participantalliance_set.get(pk=pa_id)
+
+        json_data = json.loads(request.body.decode("utf-8"))
+        pa.date1 = json_data['date1']
+        pa.date2 = json_data['date2']
+        pa.save()
+
+        return HttpResponse(json.dumps(war.info()), content_type="application/json")
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+
 def add_territory(request, war_id):
     try:
         json_data = json.loads(request.body.decode("utf-8"))

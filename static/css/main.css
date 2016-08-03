@@ -20,12 +20,14 @@ td{
 }
 
 .btn-my {
+  margin-top: 2px;
   margin-right: 10px;
   color: #FFFFFF;
   background: #65B0BC;
   padding: 4px;
   border: solid 1px #000000;
   border-radius: 5px;
+  display: inline-block;
 }
 
 .delete{

@@ -17,6 +17,7 @@ urlpatterns = [
     url(r'^(?P<war_id>[0-9]+)/participant/(?P<participant_id>[0-9]+)/delete', views.delete_participant, name='delete_participant'),
     url(r'^(?P<war_id>[0-9]+)/participant/(?P<participant_id>[0-9]+)/add_alliance', views.add_alliance, name='add_alliance'),
     url(r'^(?P<war_id>[0-9]+)/participant/(?P<participant_id>[0-9]+)/alliance/(?P<pa_id>[0-9]+)/delete', views.delete_alliance, name='delete_alliance'),
+    url(r'^(?P<war_id>[0-9]+)/participant/(?P<participant_id>[0-9]+)/alliance/(?P<pa_id>[0-9]+)/update', views.update_alliance, name='update_alliance'),
 
     url(r'^(?P<war_id>[0-9]+)/add_territory$', views.add_territory, name='add_territory'),
     url(r'^(?P<war_id>[0-9]+)/territory/(?P<territory_id>[0-9]+)/delete', views.delete_territory, name='delete_territory'),

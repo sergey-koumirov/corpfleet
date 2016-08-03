@@ -54,11 +54,11 @@
                     <td><button class="btn btn-default btn-sm" ng-click="AddAlliance(participant)">Add</button></td>
                 </tr>
                 <tr ng-repeat="alliance in participant.alliances">
-                    <td></td>
+                    <td class="text-right"><span class="btn-my delete" ng-click="DeleteAlliance({{war.instance.id}},participant.id,alliance.id)">X</span></td>
                     <td>{? alliance.alliance_name ?}</td>
-                    <td>{? alliance.date1 ?}</td>
-                    <td>{? alliance.date2 ?}</td>
-                    <td><span class="btn-my delete" ng-click="DeleteAlliance({{war.instance.id}},participant.id,alliance.id)">X</span></td>
+                    <td><input type="text" class="form-control input-sm" placeholder="Date 1" ng-model="alliance.date1"></td>
+                    <td><input type="text" class="form-control input-sm" placeholder="Date 2" ng-model="alliance.date2"></td>
+                    <td><span class="btn-my delete" ng-click="UpdateAlliance({{war.instance.id}},participant.id,alliance)">Update</span></td>
                 </tr>
             </table>
         </div>
