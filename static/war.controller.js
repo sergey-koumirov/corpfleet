@@ -5,11 +5,13 @@ var warApp = angular.module('warApp', ['angular-jquery-autocomplete']).config(fu
       $httpProvider.defaults.xsrfHeaderName = 'X-CSRFToken';
 }]);
 
-warApp.controller('WarCtrl', function ($scope, $http) {
+warApp.controller('WarCtrl', function ($scope, $http, $filter) {
 
     $scope.newWarSide = null;
     $scope.newTerritory = null;
     $scope.war = {};
+    $scope.todayStr = $filter('date')(new Date(), 'yyyy-MM-dd');
+    $scope.endOfTime = '9999-12-31 23:59:59';
 
     $scope.init = function(warId){
         $scope.warId = warId;
@@ -40,8 +42,8 @@ warApp.controller('WarCtrl', function ($scope, $http) {
             '/wars/'+$scope.warId+'/participant/'+participant.id+'/add_alliance',
             {
                 id: participant.newAllianceId,
-                date1: participant.newDate1,
-                date2: participant.newDate2
+                date1: participant.newDate1 || $scope.todayStr,
+                date2: participant.newDate2 || $scope.endOfTime
             }
         ).success(function(data) {
             $scope.war = data;

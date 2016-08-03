@@ -25,9 +25,6 @@ angular.module('angular-jquery-autocomplete', []).directive('autocomplete', func
                 select: function (event, ui) {
                     this.value = ui.item.name;
                     scope.resultId = ui.item.id;
-
-                    console.debug(scope.resultId);
-
                     scope.$apply();
                     return false;
                 },
