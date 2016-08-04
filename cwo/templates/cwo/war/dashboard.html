@@ -3,18 +3,19 @@
 
 {% block content %}
 
-<h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ war.name }} / Powers & Maps</h4>
+<h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ map.war.name }} / Powers & Maps</h4>
 
 <svg id="map" viewBox="-50 -50 1100 1100" width="1000" height="1000" style="border: 1px solid #404040">
 
-    {% for sid, system in war.statistics.systems.items %}
-    <circle cx="{{system.sx|floatformat}}" cy="{{system.sz|floatformat}}" r="2" stroke="#808080" stroke-width="1" fill="#CCCCCC" />
-        {% for structure in system.owners %}
-        <circle cx="{{system.sx|floatformat}}" cy="{{system.sz|add:10|floatformat}}" r="{{structure.defence}}" stroke="#008080" stroke-width="1" fill="#00CCCC" />
-        {% endfor %}
+    {% for link in map.war_system_links %}
+    <line x1="{{link.from.sx|floatformat}}" y1="{{link.from.sz|floatformat}}" x2="{{link.to.sx|floatformat}}" y2="{{link.to.sz|floatformat}}" stroke="#CCCCCC" stroke-width="1"/>
     {% endfor %}
 
-    {% for sid, system in war.statistics.systems.items %}
+    {% for sid, system in map.war_systems.items %}
+    <circle cx="{{system.sx|floatformat}}" cy="{{system.sz|floatformat}}" r="2" stroke="#808080" stroke-width="1" fill="#CCCCCC" />
+    {% endfor %}
+
+    {% for sid, system in map.war_systems.items %}
     <text class="system-name" x="{{system.sx|floatformat}}" dx="10" y="{{system.sz|floatformat}}" dy="4">{{system.name}}</text>
     {% endfor %}
 

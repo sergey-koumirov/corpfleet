@@ -13,3 +13,5 @@ from .wars import ParticipantAlliance
 from .wars import Territory
 from .wars import TerritoryRegion
 from .wars import War
+
+from .war_map import WarMap

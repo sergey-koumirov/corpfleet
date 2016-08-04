@@ -1,10 +1,10 @@
 from django.db import models
-from django.db import connection
+
 from cwo.models import Region
 from cwo.models import Alliance
 from cwo.models import System
-from cwo.models import Structure
-import datetime
+
+
 
 
 class War(models.Model):
@@ -21,89 +21,6 @@ class War(models.Model):
             'name': self.name,
             'participants': [p.info() for p in self.participant_set.all()],
             'territories': [t.info() for t in self.territory_set.all()]
-        }
-
-    def systems(self):
-        mm = self.minmax()
-        ownership = self.ownership()
-
-        result = {}
-        sql = (
-            'SELECT s.* '
-            '  FROM cwo_dev.cwo_system s '
-            '  where s.region_id in ('
-            '          select tr.region_id '
-            '            from cwo_dev.cwo_territoryregion tr, cwo_dev.cwo_territory t '
-            '            where tr.territory_id = t.id '
-            '              and t.war_id = %s'
-            '        )'
-        )
-        for s in System.objects.raw(sql, [self.id]):
-            result[s.id]={
-                'name': s.name,
-                'sx': (s.x - mm['minx']) / mm['factor'],
-                'sy': (s.y - mm['miny']) / mm['factor'],
-                'sz': 1000-(s.z - mm['minz']) / mm['factor'],
-                'owners': ownership.get(s.id,[])
-            }
-        return result
-
-    def minmax(self):
-        sql = (
-            'SELECT min(s.x) as minx, max(s.x) as maxx, '
-            '       min(s.y) as miny, max(s.y) as maxy, '
-            '       min(s.z) as minz, max(s.z) as maxz '
-            '  FROM cwo_dev.cwo_system s '
-            '  where s.region_id in ('
-            '          select tr.region_id '
-            '            from cwo_dev.cwo_territoryregion tr, cwo_dev.cwo_territory t '
-            '            where tr.territory_id = t.id '
-            '              and t.war_id = %s'
-            '        )'
-        )
-        cursor = connection.cursor()
-        cursor.execute(sql, [self.id])
-        result = cursor.fetchone()
-        return {
-            'minx': result[0],
-            'maxx': result[1],
-            'miny': result[2],
-            'maxy': result[3],
-            'minz': result[4],
-            'maxz': result[5],
-            'width': result[1]-result[0],
-            'height': result[3]-result[2],
-            'deep': result[5]-result[4],
-            'factor': max(result[1]-result[0],result[5]-result[5]) / 1000
-        }
-
-    def ownership(self):
-        sql = (
-            'SELECT str.* '
-            '  FROM cwo_dev.cwo_structure str '
-            '  where str.system_id in ( '
-            '          select s.id '
-            '            from cwo_dev.cwo_territoryregion tr, '
-            '                 cwo_dev.cwo_territory t, '
-            '                 cwo_dev.cwo_system s '
-            '            where tr.territory_id = t.id '
-            '              and s.region_id = tr.region_id '
-            '              and t.war_id = %(war_id)s '
-            '        ) '
-            '    and str.date1 < %(date)s '
-            '    and %(date)s <= str.date2 '
-        )
-        result = {}
-        for structure in Structure.objects.raw(sql, {'war_id': self.id, 'date': '{0:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())}):
-            if not structure.system_id in result:
-                result[structure.system_id] = []
-            result[structure.system_id].append(structure)
-        return result
-
-    def statistics(self):
-        return {
-            'systems': self.systems(),
-            'ownership': self.ownership(),
         }
 
 

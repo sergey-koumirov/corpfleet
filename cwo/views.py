@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.http import Http404
 from django.http import HttpResponse
 from .models import War
+from .models import WarMap
 from .models import Alliance
 from .models import Region
 from .forms import WarForm
@@ -203,6 +204,7 @@ def war_regions(request):
 def war_dashboard(request, war_id):
     try:
         war = War.objects.get(pk=war_id)
-        return render(request, 'cwo/war/dashboard.html', {'war': war, 'border': war.minmax()})
+        map = WarMap(war)
+        return render(request, 'cwo/war/dashboard.html', {'map': map})
     except War.DoesNotExist:
         raise Http404("War does not exist")
