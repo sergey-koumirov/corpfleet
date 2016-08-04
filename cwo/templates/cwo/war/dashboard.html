@@ -3,9 +3,42 @@
 
 {% block content %}
 
+<script>
+    $(function(){
+        var r1=10, r2=40, x=100, y=200;
+
+        var points=[
+          {x: 0, y: r1},
+          {x: r1 * Math.cos( Math.PI/6 ), y: r1 * Math.sin( Math.PI/6 )},
+          {x: r2 * Math.cos( Math.PI/6 ), y: r2 * Math.sin( Math.PI/6 )},
+          {x: 0, y: r2},
+          {x: r2 * Math.cos( 5*Math.PI/6 ), y: r2 * Math.sin( 5*Math.PI/6 )},
+          {x: r1 * Math.cos( 5*Math.PI/6 ), y: r1 * Math.sin( 5*Math.PI/6 )}
+        ];
+
+        var desc = "";
+
+        $.each(points, function(i,el){
+            if(i==0){
+              desc = "M "+el.x+" "+el.y+" ";
+            }else{
+              desc = desc + "L "+el.x+" "+el.y+" ";
+            }
+        });
+
+        $("#test1").attr('d', desc);
+        $("#test2").attr('d', desc);
+        $("#test3").attr('d', desc);
+    });
+</script>
+
 <h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ map.war.name }} / Powers & Maps</h4>
 
 <svg id="map" viewBox="-50 -50 1100 1100" width="1000" height="1000" style="border: 1px solid #404040">
+
+    <path id="test1"/>
+    <path id="test2" transform="rotate(120, 0, 0)"/>
+    <path id="test3" transform="rotate(240, 0, 0)"/>
 
     {% for link in map.war_system_links %}
     <line x1="{{link.from.sx|floatformat}}" y1="{{link.from.sz|floatformat}}" x2="{{link.to.sx|floatformat}}" y2="{{link.to.sz|floatformat}}" stroke="#CCCCCC" stroke-width="1"/>
