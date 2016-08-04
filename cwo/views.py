@@ -21,6 +21,9 @@ def war_index(request):
 def war_new(request):
     war = War()
     war.name = '[ {0:%Y-%m-%d %H:%M:%S} ] Red vs Blue'.format(datetime.datetime.now())
+    war.date1 = datetime.datetime.now()
+    war.date2 = datetime.datetime(9999, 12, 1, hour=23, minute=59, second=59)
+
     context = {
         'war': WarForm(instance=war)
     }

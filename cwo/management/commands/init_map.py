@@ -5,8 +5,6 @@ from cwo.models import Constellation
 from cwo.models import System
 from cwo.models import Gate
 
-import pprint
-
 
 class Command(BaseCommand):
     help = 'Create Map Records'
@@ -41,19 +39,12 @@ class Command(BaseCommand):
                     )
                     s.save()
 
-                    # print(system_info)
-                    # print(system_info.stargates)
-
                     for gate in system_info.stargates:
-                        print(gate.name)
                         gate_info = gate()
+                        print(gate.name)
                         g, created = Gate.objects.get_or_create(
                             id=gate.id,
                             system_from_id=system.id,
                             system_to_id=gate_info.destination.system.id
                         )
                         s.save()
-
-
-
-

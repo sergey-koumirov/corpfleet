@@ -10,6 +10,8 @@ import datetime
 class War(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200)
+    date1 = models.DateTimeField(null=True)
+    date2 = models.DateTimeField(null=True)
 
     def __str__(self):
         return "[{}] {}".format(self.id, self.name)

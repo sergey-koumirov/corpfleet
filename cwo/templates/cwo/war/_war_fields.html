@@ -1,0 +1,13 @@
+{{ war.non_field_errors }}
+<div class="form-group">
+    <label for="{{ war.name.id_for_label }}">Name: {{ war.name.errors }}</label>
+    <input type="text" size=50 class="form-control" id="{{ war.name.id_for_label }}" name="{{ war.name.html_name }}" value="{{ war.name.value }}" />
+</div>
+<div class="form-group">
+    <label for="{{ war.date1.id_for_label }}">Date 1: {{ war.date1.errors }}</label>
+    <input type="text" size=20 class="form-control" id="{{ war.date1.id_for_label }}" name="{{ war.date1.html_name }}" value="{{ war.date1.value | date:'Y-m-d H:i:s' }}" />
+</div>
+<div class="form-group">
+    <label for="{{ war.date2.id_for_label }}">Date 2: {{ war.date2.errors }}</label>
+    <input type="text" size=20 class="form-control" id="{{ war.date2.id_for_label }}" name="{{ war.date2.html_name }}" value="{{ war.date2.value | date:'Y-m-d H:i:s' }}" />
+</div>
