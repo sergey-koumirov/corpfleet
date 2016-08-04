@@ -34,3 +34,7 @@ td{
   cursor: pointer;
   color: #25606C;
 }
+
+#map .system-name{
+  font-size: 10px;
+}

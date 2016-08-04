@@ -5,15 +5,19 @@
 
 <h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ war.name }} / Powers & Maps</h4>
 
-<svg viewBox="-10 -10 1100 1100" width="1000" height="1000" style="border: 1px solid #404040">
+<svg id="map" viewBox="-10 -10 1100 1100" width="1000" height="1000" style="border: 1px solid #404040">
 
-    {% for system in war.statistics.systems %}
-    <circle cx="{{system.sx|floatformat}}" cy="{{system.sz|floatformat}}" r="5" stroke="#808080" stroke-width="1" fill="#CCCCCC" />
+    {% for sid, system in war.statistics.systems.items %}
+    <circle cx="{{system.sx|floatformat}}" cy="{{system.sz|floatformat}}" r="2" stroke="#808080" stroke-width="1" fill="#CCCCCC" />
+        {% for structure in system.owners %}
+        <circle cx="{{system.sx|floatformat}}" cy="{{system.sz|add:10|floatformat}}" r="{{structure.defence}}" stroke="#008080" stroke-width="1" fill="#00CCCC" />
+        {% endfor %}
     {% endfor %}
 
-    {% for system in war.statistics.systems %}
-    <text x="{{system.sx|floatformat}}" dx="10" y="{{system.sz|floatformat}}" dy="4">{{system.name}}</text>
+    {% for sid, system in war.statistics.systems.items %}
+    <text class="system-name" x="{{system.sx|floatformat}}" dx="10" y="{{system.sz|floatformat}}" dy="4">{{system.name}}</text>
     {% endfor %}
+
 
 </svg>
 
