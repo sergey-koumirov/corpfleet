@@ -65,6 +65,11 @@ svg text{
   fill-opacity: 0.5;
 }
 
+svg line{
+  stroke: #CCCCCC;
+  stroke-width: 1;
+}
+
 ul.participant{
   float: left;
 }

@@ -88,29 +88,6 @@ class WarMap:
 
         return result
 
-    def ownership(self):
-        sql = (
-            'SELECT str.* '
-            '  FROM cwo_structure str '
-            '  where str.system_id in ( '
-            '          select s.id '
-            '            from cwo_territoryregion tr, '
-            '                 cwo_territory t, '
-            '                 cwo_system s '
-            '            where tr.territory_id = t.id '
-            '              and s.region_id = tr.region_id '
-            '              and t.war_id = %(war_id)s '
-            '        ) '
-            '    and str.date1 < %(date)s '
-            '    and %(date)s <= str.date2 '
-        )
-        result = {}
-        for structure in Structure.objects.raw(sql, {'war_id': self.war.id, 'date': '{0:%Y-%m-%d %H:%M:%S}'.format(datetime.datetime.now())}):
-            if not structure.system_id in result:
-                result[structure.system_id] = []
-            result[structure.system_id].append(structure)
-        return result
-
     def war_system_links(self, territory_id):
         sql = (
             'SELECT DISTINCT '
@@ -148,3 +125,44 @@ class WarMap:
             }
 
         return result
+
+    def ownership(self):
+        sql = (
+            'SELECT concat(\'s\',s.system_id, case s.type_id when 32458 then \'hub\' when 32226 then \'tcu\' else \'sta\' end) as sid, '
+            '       p.id,'
+            '       p.name, '
+            '       s.defence, '
+            '       s.date1, '
+            '       s.date2 '
+            '  FROM cwo_system sys, '
+            '       cwo_structure s '
+            '         left join cwo_participantalliance pa on s.alliance_id = pa.alliance_id '
+            '         left join cwo_participant p on p.id = pa.participant_id and p.war_id=%(war_id)s '
+            '  where s.system_id = sys.id '
+            '    and sys.region_id in ( '
+            '          select tr.region_id '
+            '            from cwo_territoryregion tr, '
+            '                 cwo_territory t '
+            '            where tr.territory_id = t.id '
+            '              and t.war_id = %(war_id)s '
+            '        ) '
+            '    and s.date1 < %(date2)s '
+            '    and s.date2 > %(date1)s '
+            '  order by sid, date1'
+        )
+        cursor = connection.cursor()
+        cursor.execute(sql, {'war_id': self.war.id, 'date1':self.war.date1, 'date2':self.war.date2})
+
+        result = {}
+        for record in cursor.fetchall():
+            if record[0] not in result:
+                result[record[0]] = []
+            result[record[0]].append({
+                'pid': record[1] or 'null',
+                'm': record[3],
+                'd1': record[4],
+                'd2': record[5],
+            })
+
+        return result
+
