@@ -32,8 +32,23 @@
 
 <h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ map.war.name }} / Powers & Maps</h4>
 
-{% for tid, tinfo in map.war_systems.items %}
+<h3>Participants</h3>
+    {% for participant in map.war.participant_set.all %}
+    <ul class="participant">
+        <li style="color:{{participant.color}}"><b>{{participant.name}}</b></li>
+        <ul>
+            {% for alliance in participant.info.alliances %}
+            <li style="color:{{participant.color}}">{{alliance.alliance_name}}</li>
+            {% endfor %}
+        </ul>
+    </ul>
+    {% endfor %}
 
+<hr class="clear">
+
+<h3>Territories</h3>
+
+{% for tid, tinfo in map.war_systems.items %}
 <h4>{{tinfo.territory.name}}</h4>
 {% for region in tinfo.territory.regions %}
 <span class="btn-my">{{region.name}}</span>

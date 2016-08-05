@@ -64,3 +64,11 @@ svg text{
   fill: #404040;
   fill-opacity: 0.5;
 }
+
+ul.participant{
+  float: left;
+}
+
+.clear{
+  clear: both;
+}
