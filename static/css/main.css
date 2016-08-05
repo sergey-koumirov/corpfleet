@@ -55,3 +55,12 @@ td{
 {
   margin-bottom:0px;
 }
+
+svg {
+  margin-top: 5px;
+}
+
+svg text{
+  fill: #404040;
+  fill-opacity: 0.5;
+}

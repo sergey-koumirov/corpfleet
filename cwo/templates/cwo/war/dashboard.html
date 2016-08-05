@@ -35,6 +35,10 @@
 {% for tid, tinfo in map.war_systems.items %}
 
 <h4>{{tinfo.territory.name}}</h4>
+{% for region in tinfo.territory.regions %}
+<span class="btn-my">{{region.name}}</span>
+{% endfor %}
+<br>
 <svg id="t{{tid}}" viewBox="-50 -50 1100 1100" width="1000" height="1000" style="border: 1px solid #404040">
 
     {% for link in tinfo.links %}
@@ -49,7 +53,7 @@
     {% endfor %}
 
     {% for sid, system in tinfo.systems.items %}
-    <text class="system-name" x="{{system.sx|floatformat}}" dx="10" y="{{system.sz|floatformat}}" dy="4">{{system.name}}</text>
+    <text x="{{system.sx|floatformat}}" dx="10" y="{{system.sz|floatformat}}" dy="4">{{system.name}}</text>
     {% endfor %}
 </svg>
 

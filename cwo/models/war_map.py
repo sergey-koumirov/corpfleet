@@ -1,6 +1,7 @@
 from cwo.models import Territory
 from cwo.models import System
 from cwo.models import Structure
+from cwo.models import Region
 from django.db import connection
 import datetime
 
@@ -140,5 +141,10 @@ class WarMap:
     def territories(self):
         result = {}
         for t in Territory.objects.raw('SELECT t.* FROM cwo_territory t where t.war_id = %s',[self.war.id]):
-            result[t.id] = t
+            result[t.id] = {
+                'id': t.id,
+                'name': t.name,
+                'regions': Region.objects.raw('select r.* from cwo_region r where r.id in (select tr.region_id from cwo_territoryregion tr where tr.territory_id = %s)', [t.id])
+            }
+
         return result
