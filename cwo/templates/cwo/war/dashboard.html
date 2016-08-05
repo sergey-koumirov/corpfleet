@@ -92,7 +92,7 @@ $(function(){
     {% endfor %}
 
     {% for sid, system in tinfo.systems.items %}
-    <circle cx="{{system.sx|floatformat}}" cy="{{system.sz|floatformat}}" r="2" stroke="#808080" stroke-width="1" fill="#CCCCCC" />
+    <circle cx="{{system.sx|floatformat}}" cy="{{system.sz|floatformat}}" r="2" />
     <path id="s{{sid}}hub" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}})"/>
     <path id="s{{sid}}tcu" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(120, 0, 0)"/>
     <path id="s{{sid}}sta" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(240, 0, 0)"/>
