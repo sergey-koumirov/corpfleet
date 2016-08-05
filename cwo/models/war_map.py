@@ -1,3 +1,4 @@
+from cwo.models import Territory
 from cwo.models import System
 from cwo.models import Structure
 from django.db import connection
@@ -7,80 +8,84 @@ class WarMap:
 
     def __init__(self, war):
         self.war = war
-        self.minmax = self.minmax()
+        self._minmax = self.minmax()
         self.ownership = self.ownership()
-        self.war_systems = self.war_systems()
-        self.systems = self.systems()
-        self.war_system_links = self.war_system_links()
 
-    def map_info(self):
-        return {
-            'systems' : self.war_systems,
-            'links': self.war_system_links
-        }
+        self.territories = self.territories()
+        self._systems = self.systems()
+
+        self.war_systems = self.war_systems()
 
     def war_systems(self):
-        result = {}
         sql = (
-            'SELECT s.* '
-            '  FROM cwo_system s '
-            '  where s.region_id in ('
-            '          select tr.region_id '
-            '            from cwo_territoryregion tr, cwo_territory t '
-            '            where tr.territory_id = t.id '
-            '              and t.war_id = %s'
-            '        )'
+            'select t.id as tid, s.id as sid '
+            '  from cwo_territoryregion tr, cwo_territory t, cwo_system s '
+            '  where tr.territory_id = t.id '
+            '    and s.region_id = tr.region_id'
+            '    and t.war_id = %s'
         )
-        for s in System.objects.raw(sql, [self.war.id]):
-            result[s.id]={
-                'name': s.name,
-                'sx': (s.x - self.minmax['minx']) / self.minmax['factor'],
-                'sy': (s.y - self.minmax['miny']) / self.minmax['factor'],
-                'sz': 1000-(s.z - self.minmax['minz']) / self.minmax['factor'],
-                'owners': self.ownership.get(s.id,[])
-            }
+        cursor = connection.cursor()
+        cursor.execute(sql, [self.war.id])
+
+        result = {}
+        for record in cursor.fetchall():
+            if record[0] not in result:
+                result[record[0]] = {
+                    'territory': self.territories[record[0]],
+                    'systems': {},
+                    'links': self.war_system_links(record[0])
+                }
+            result[record[0]]['systems'][record[1]] = self.system_on_territory(record[1], record[0])
         return result
 
     def systems(self):
         result = {}
         for s in System.objects.raw('SELECT s.* FROM cwo_system s '):
-            result[s.id]={
-                'name': s.name,
-                'sx': (s.x - self.minmax['minx']) / self.minmax['factor'],
-                'sy': (s.y - self.minmax['miny']) / self.minmax['factor'],
-                'sz': 1000-(s.z - self.minmax['minz']) / self.minmax['factor'],
-                'owners': self.ownership.get(s.id,[])
-            }
+            result[s.id]=s
         return result
+
+    def system_on_territory(self, system_id, territory_id):
+        minmax = self._minmax[territory_id]
+        system = self._systems[system_id]
+        return {
+            'name': system.name,
+            'sx': (system.x - minmax['minx']) / minmax['factor'],
+            'sy': (system.y - minmax['miny']) / minmax['factor'],
+            'sz': 1000-(system.z - minmax['minz']) / minmax['factor']
+        }
 
     def minmax(self):
         sql = (
-            'SELECT min(s.x) as minx, max(s.x) as maxx, '
+            'select t.id as tid, '
+            '       min(s.x) as minx, max(s.x) as maxx, '
             '       min(s.y) as miny, max(s.y) as maxy, '
             '       min(s.z) as minz, max(s.z) as maxz '
-            '  FROM cwo_system s '
-            '  where s.region_id in ('
-            '          select tr.region_id '
-            '            from cwo_territoryregion tr, cwo_territory t '
-            '            where tr.territory_id = t.id '
-            '              and t.war_id = %s'
-            '        )'
+            '  from cwo_territoryregion tr, cwo_territory t, cwo_system s '
+            '  where tr.territory_id = t.id '
+            '    and s.region_id = tr.region_id '
+            '    and t.war_id = %s '
+            '  group by t.id '
         )
         cursor = connection.cursor()
         cursor.execute(sql, [self.war.id])
-        result = cursor.fetchone()
-        return {
-            'minx': result[0],
-            'maxx': result[1],
-            'miny': result[2],
-            'maxy': result[3],
-            'minz': result[4],
-            'maxz': result[5],
-            'width': result[1]-result[0],
-            'height': result[3]-result[2],
-            'deep': result[5]-result[4],
-            'factor': max(result[1]-result[0],result[5]-result[4]) / 1000
-        }
+        result = {}
+        for record in cursor.fetchall():
+            if record[0] not in result:
+                result[record[0]] = {}
+            result[record[0]] = {
+                'minx': record[1],
+                'maxx': record[2],
+                'miny': record[3],
+                'maxy': record[4],
+                'minz': record[5],
+                'maxz': record[6],
+                'width': record[2]-record[1],
+                'height': record[4]-record[3],
+                'deep': record[6]-record[5],
+                'factor': max(record[2]-record[1],record[6]-record[5]) / 1000
+            }
+
+        return result
 
     def ownership(self):
         sql = (
@@ -105,7 +110,7 @@ class WarMap:
             result[structure.system_id].append(structure)
         return result
 
-    def war_system_links(self):
+    def war_system_links(self, territory_id):
         sql = (
             'SELECT DISTINCT '
             '    CASE WHEN g.system_from_id > g.system_to_id THEN g.system_from_id ELSE g.system_to_id END as fid, '
@@ -119,12 +124,21 @@ class WarMap:
             '      select tr.region_id '
             '        from cwo_territoryregion tr, cwo_territory t '
             '        where tr.territory_id = t.id '
-            '          and t.war_id = %s '
+            '          and t.id = %s '
             '    )'
         )
         cursor = connection.cursor()
-        cursor.execute(sql, [self.war.id])
+        cursor.execute(sql, [territory_id])
         result = []
         for record in cursor.fetchall():
-          result.append({'from': self.systems[record[0]], 'to': self.systems[record[1]]})
+          result.append({
+              'from': self.system_on_territory(record[0], territory_id),
+              'to': self.system_on_territory(record[1], territory_id)
+          })
+        return result
+
+    def territories(self):
+        result = {}
+        for t in Territory.objects.raw('SELECT t.* FROM cwo_territory t where t.war_id = %s',[self.war.id]):
+            result[t.id] = t
         return result

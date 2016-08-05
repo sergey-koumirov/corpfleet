@@ -32,24 +32,27 @@
 
 <h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ map.war.name }} / Powers & Maps</h4>
 
-<svg id="map" viewBox="-50 -50 1100 1100" width="1000" height="1000" style="border: 1px solid #404040">
+{% for tid, tinfo in map.war_systems.items %}
 
-    {% for link in map.war_system_links %}
+<h4>{{tinfo.territory.name}}</h4>
+<svg id="t{{tid}}" viewBox="-50 -50 1100 1100" width="1000" height="1000" style="border: 1px solid #404040">
+
+    {% for link in tinfo.links %}
     <line x1="{{link.from.sx|floatformat}}" y1="{{link.from.sz|floatformat}}" x2="{{link.to.sx|floatformat}}" y2="{{link.to.sz|floatformat}}" stroke="#CCCCCC" stroke-width="1"/>
     {% endfor %}
 
-    {% for sid, system in map.war_systems.items %}
+    {% for sid, system in tinfo.systems.items %}
     <circle cx="{{system.sx|floatformat}}" cy="{{system.sz|floatformat}}" r="2" stroke="#808080" stroke-width="1" fill="#CCCCCC" />
     <path id="s{{sid}}hub" fill="#044B94" fill-opacity="0.5" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}})"/>
     <path id="s{{sid}}tcu" fill="#044B94" fill-opacity="0.5" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(120, 0, 0)"/>
     <path id="s{{sid}}sta" fill="#044B94" fill-opacity="0.5" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(240, 0, 0)"/>
     {% endfor %}
 
-    {% for sid, system in map.war_systems.items %}
+    {% for sid, system in tinfo.systems.items %}
     <text class="system-name" x="{{system.sx|floatformat}}" dx="10" y="{{system.sz|floatformat}}" dy="4">{{system.name}}</text>
     {% endfor %}
-
-
 </svg>
+
+{% endfor %}
 
 {% endblock %}
