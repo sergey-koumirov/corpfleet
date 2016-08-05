@@ -5,6 +5,34 @@
 
 <script>
 $(function(){
+
+  var pointsHash = {}
+  getOrCalc = function(adm){
+      if( !pointsHash[adm] ){
+          var r1 = 4.0,
+              r2 = 4.0 + 2.0 + adm * 1.5,
+              desc = "";
+          points=[
+            {x: 0, y: r1},
+            {x: r1 * Math.cos( Math.PI/6 ), y: r1 * Math.sin( Math.PI/6 )},
+            {x: r2 * Math.cos( Math.PI/6 ), y: r2 * Math.sin( Math.PI/6 )},
+            {x: 0, y: r2},
+            {x: r2 * Math.cos( 5*Math.PI/6 ), y: r2 * Math.sin( 5*Math.PI/6 )},
+            {x: r1 * Math.cos( 5*Math.PI/6 ), y: r1 * Math.sin( 5*Math.PI/6 )}
+          ]
+
+          $.each(points, function(i,el){
+            if(i==0){
+              desc = "M "+el.x+" "+el.y+" ";
+            }else{
+              desc = desc + "L "+el.x+" "+el.y+" ";
+            }
+          });
+          pointsHash[adm] = desc;
+      }
+      return pointsHash[adm];
+  }
+
   var participants = {
     {% for participant in map.war.participant_set.all %}
       {{participant.id}}: {name: '{{participant.name}}', color: '{{participant.color}}'}{% if not forloop.last %},{% endif %}
@@ -19,30 +47,10 @@ $(function(){
     {% endfor %}
   };
 
-  var r1=3, r2=9;
-
-  var points=[
-    {x: 0, y: r1},
-    {x: r1 * Math.cos( Math.PI/6 ), y: r1 * Math.sin( Math.PI/6 )},
-    {x: r2 * Math.cos( Math.PI/6 ), y: r2 * Math.sin( Math.PI/6 )},
-    {x: 0, y: r2},
-    {x: r2 * Math.cos( 5*Math.PI/6 ), y: r2 * Math.sin( 5*Math.PI/6 )},
-    {x: r1 * Math.cos( 5*Math.PI/6 ), y: r1 * Math.sin( 5*Math.PI/6 )}
-  ];
-
-  var desc = "";
-
-  $.each(points, function(i,el){
-    if(i==0){
-      desc = "M "+el.x+" "+el.y+" ";
-    }else{
-      desc = desc + "L "+el.x+" "+el.y+" ";
-    }
-  });
-
   for(k in ownership){
-    values = ownership[k];
-    last = values[values.length-1];
+    var values = ownership[k],
+        last = values[values.length-1]
+        desc = getOrCalc(last.m);
 
     el = $("#"+k)
     if(last.pid){
@@ -52,8 +60,8 @@ $(function(){
       el.attr('fill-opacity', 0.5);
     }else{
       el.attr('d', desc);
-      el.attr('fill', "#DDDDDD");
-      el.attr('fill-opacity', 0.5);
+      el.attr('fill', "url(#diagonalHatch)");
+      el.attr('fill-opacity', 1);
     }
   };
 
@@ -86,6 +94,12 @@ $(function(){
 {% endfor %}
 <br>
 <svg id="t{{tid}}" viewBox="-50 -50 1100 1100" width="1000" height="1000" style="border: 1px solid #404040">
+    <defs>
+        <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
+            <path d="M-1,1 l2,-2  M0,4 l4,-4  M3,5 l2,-2" style="stroke:black; stroke-width:1"/>
+        </pattern>
+    </defs>
+
 
     {% for link in tinfo.links %}
     <line x1="{{link.from.sx|floatformat}}" y1="{{link.from.sz|floatformat}}" x2="{{link.to.sx|floatformat}}" y2="{{link.to.sz|floatformat}}" />
@@ -93,9 +107,9 @@ $(function(){
 
     {% for sid, system in tinfo.systems.items %}
     <circle cx="{{system.sx|floatformat}}" cy="{{system.sz|floatformat}}" r="2" />
-    <path id="s{{sid}}hub" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}})"/>
-    <path id="s{{sid}}tcu" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(120, 0, 0)"/>
-    <path id="s{{sid}}sta" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(240, 0, 0)"/>
+    <path id="s{{sid}}hub" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(60, 0, 0)"/>
+    <path id="s{{sid}}tcu" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(180, 0, 0)"/>
+    <path id="s{{sid}}sta" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(300, 0, 0)"/>
     {% endfor %}
 
     {% for sid, system in tinfo.systems.items %}
