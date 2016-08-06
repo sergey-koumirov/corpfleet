@@ -39,8 +39,9 @@
             <table class="table-condensed" ng-repeat="participant in war.participants" ng-cloak>
                 <tr style="border: 2px solid {? participant.color ?}">
                     <td class="col-md-3">
-                        <span class="btn-my delete" ng-click="DeleteParticipant({{war.instance.id}},participant.id)">X</span>
-                        {? participant.name ?}
+                        <span class="btn-my delete" ng-click="DeleteParticipant(participant.id)">X</span>
+                        <input type="text" ng-model="participant.name">
+                        <button class="btn btn-default btn-sm" ng-click="UpdateParticipant(participant)">Change</button>
                     </td>
                     <td class="form-inline">
                         <input type="text" size=40 class="form-control input-sm" placeholder="Alliance name"
@@ -51,11 +52,11 @@
                     <td><button class="btn btn-default btn-sm" ng-click="AddAlliance(participant)" ng-disabled="!participant.newAllianceId">Add</button></td>
                 </tr>
                 <tr ng-repeat="alliance in participant.alliances">
-                    <td class="text-right"><span class="btn-my delete" ng-click="DeleteAlliance({{war.instance.id}},participant.id,alliance.id)">X</span></td>
+                    <td class="text-right"><span class="btn-my delete" ng-click="DeleteAlliance(participant.id,alliance.id)">X</span></td>
                     <td>{? alliance.alliance_name ?}</td>
                     <td><input type="text" class="form-control input-sm" placeholder="Date 1" ng-model="alliance.date1"></td>
                     <td><input type="text" class="form-control input-sm" placeholder="Date 2" ng-model="alliance.date2"></td>
-                    <td><span class="btn-my delete" ng-click="UpdateAlliance({{war.instance.id}},participant.id,alliance)">Update</span></td>
+                    <td><span class="btn-my delete" ng-click="UpdateAlliance(participant.id,alliance)">Update</span></td>
                 </tr>
                 <tr><td>&nbsp;</td><td></td></tr>
             </table>
@@ -71,8 +72,9 @@
             <table class="table-condensed" ng-repeat="territory in war.territories" ng-cloak>
                 <tr>
                     <td class="col-md-3">
-                        <span class="btn-my delete" ng-click="DeleteTerritory({{war.instance.id}},territory.id)">X</span>
-                        {? territory.name ?}
+                        <span class="btn-my delete" ng-click="DeleteTerritory(territory.id)">X</span>
+                        <input type="text" ng-model="territory.name">
+                        <button class="btn btn-default btn-sm" ng-click="UpdateTerritory(territory)">Change</button>
                     </td>
                     <td class="form-inline">
                         <input type="text" size=40 class="form-control input-sm" placeholder="Region name"
@@ -85,7 +87,7 @@
                     <td>
                         <span class="btn-my" ng-repeat="region in territory.regions">
                             {? region.region_name ?}
-                            <span class="delete" ng-click="DeleteRegion({{war.instance.id}},territory.id,region.id)">X</span>
+                            <span class="delete" ng-click="DeleteRegion(territory.id,region.id)">X</span>
                         </span>
                     </td>
                 </tr>

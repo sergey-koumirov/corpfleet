@@ -91,6 +91,18 @@ def delete_participant(request, war_id, participant_id):
         raise Http404("War does not exist")
 
 
+def update_participant(request, war_id, participant_id):
+    try:
+        war = War.objects.get(pk=war_id)
+        participant = war.participant_set.get(pk=participant_id)
+        json_data = json.loads(request.body.decode("utf-8"))
+        participant.name = json_data['name']
+        participant.save()
+        return HttpResponse(json.dumps(war.info()), content_type="application/json")
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+
 def add_alliance(request, war_id, participant_id):
     try:
         json_data = json.loads(request.body.decode("utf-8"))
@@ -150,6 +162,18 @@ def delete_territory(request, war_id, territory_id):
         war = War.objects.get(pk=war_id)
         territory = war.territory_set.get(pk=territory_id)
         territory.delete()
+        return HttpResponse(json.dumps(war.info()), content_type="application/json")
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+
+def update_territory(request, war_id, territory_id):
+    try:
+        war = War.objects.get(pk=war_id)
+        territory = war.territory_set.get(pk=territory_id)
+        json_data = json.loads(request.body.decode("utf-8"))
+        territory.name = json_data['name']
+        territory.save()
         return HttpResponse(json.dumps(war.info()), content_type="application/json")
     except War.DoesNotExist:
         raise Http404("War does not exist")
