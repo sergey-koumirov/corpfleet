@@ -16,6 +16,7 @@ class WarMap:
         self._systems = self.systems()
 
         self.war_systems = self.war_systems()
+        self.participants = self.participants()
 
     def war_systems(self):
         sql = (
@@ -128,16 +129,13 @@ class WarMap:
 
     def ownership(self):
         sql = (
-            'SELECT concat(\'s\',s.system_id, case s.type_id when 32458 then \'hub\' when 32226 then \'tcu\' else \'sta\' end) as sid, '
-            '       p.id,'
-            '       p.name, '
+            'SELECT concat(\'s\',s.system_id, case s.type_id when 32458 then \'h\' when 32226 then \'t\' else \'s\' end) as sid, '
+            '       s.alliance_id,'
             '       s.defence, '
             '       s.date1, '
             '       s.date2 '
             '  FROM cwo_system sys, '
             '       cwo_structure s '
-            '         left join cwo_participantalliance pa on s.alliance_id = pa.alliance_id '
-            '         left join cwo_participant p on p.id = pa.participant_id and p.war_id=%(war_id)s '
             '  where s.system_id = sys.id '
             '    and sys.region_id in ( '
             '          select tr.region_id '
@@ -158,11 +156,34 @@ class WarMap:
             if record[0] not in result:
                 result[record[0]] = []
             result[record[0]].append({
-                'pid': record[1] or 'null',
-                'm': record[3],
-                'd1': record[4],
-                'd2': record[5],
+                'aid': record[1],
+                'm': record[2],
+                'd1': record[3],
+                'd2': record[4],
             })
 
         return result
 
+    def participants(self):
+        sql = (
+            'SELECT pa.alliance_id, p.id, p.name, pa.date1, pa.date2, p.color '
+            '    FROM cwo_participantalliance pa, '
+            '         cwo_participant p '
+            '    where p.id = pa.participant_id '
+            '      and p.war_id=%s '
+            '    order by pa.alliance_id, pa.date1 '
+        )
+        cursor = connection.cursor()
+        cursor.execute(sql, [self.war.id])
+        result = {}
+        for record in cursor.fetchall():
+            if record[0] not in result:
+                result[record[0]] = []
+            result[record[0]].append({
+                'pid': record[1],
+                'name': record[2],
+                'd1': record[3],
+                'd2': record[4],
+                'color': record[5],
+            })
+        return result

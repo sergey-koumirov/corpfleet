@@ -4,72 +4,125 @@
 {% block content %}
 
 <script>
-$(function(){
+var toogleSystemNames = function(tid){
+    var checked = $('#showtext'+tid).prop('checked');
+    $('#t'+tid+' text').toggle(checked);
+}
 
-  var pointsHash = {}
-  getOrCalc = function(adm){
-      if( !pointsHash[adm] ){
-          var r1 = 4.0,
-              r2 = 4.0 + 2.0 + adm * 1.5,
-              desc = "";
-          points=[
-            {x: 0, y: r1},
-            {x: r1 * Math.cos( Math.PI/6 ), y: r1 * Math.sin( Math.PI/6 )},
-            {x: r2 * Math.cos( Math.PI/6 ), y: r2 * Math.sin( Math.PI/6 )},
-            {x: 0, y: r2},
-            {x: r2 * Math.cos( 5*Math.PI/6 ), y: r2 * Math.sin( 5*Math.PI/6 )},
-            {x: r1 * Math.cos( 5*Math.PI/6 ), y: r1 * Math.sin( 5*Math.PI/6 )}
-          ]
+var pointsHash = {}
+var getOrCalc = function(adm){
+  if( !pointsHash[adm] ){
+      var r1 = 4.0,
+          r2 = 4.0 + 2.0 + adm * 1.5,
+          desc = "";
+      points=[
+        {x: 0, y: r1},
+        {x: r1 * Math.cos( Math.PI/6 ), y: r1 * Math.sin( Math.PI/6 )},
+        {x: r2 * Math.cos( Math.PI/6 ), y: r2 * Math.sin( Math.PI/6 )},
+        {x: 0, y: r2},
+        {x: r2 * Math.cos( 5*Math.PI/6 ), y: r2 * Math.sin( 5*Math.PI/6 )},
+        {x: r1 * Math.cos( 5*Math.PI/6 ), y: r1 * Math.sin( 5*Math.PI/6 )}
+      ]
 
-          $.each(points, function(i,el){
-            if(i==0){
-              desc = "M "+el.x+" "+el.y+" ";
-            }else{
-              desc = desc + "L "+el.x+" "+el.y+" ";
-            }
-          });
-          pointsHash[adm] = desc;
+      $.each(points, function(i,el){
+        if(i==0){
+          desc = "M "+el.x+" "+el.y+" ";
+        }else{
+          desc = desc + "L "+el.x+" "+el.y+" ";
+        }
+      });
+      pointsHash[adm] = desc;
+  }
+  return pointsHash[adm];
+}
+
+var getOwnerOnDate = function(owners, date){
+  for(index in owners){
+      var own = owners[index]
+      if(own.d1 < date && date <= own.d2){
+         return own;
       }
-      return pointsHash[adm];
   }
+  return null;
+}
 
-  var participants = {
-    {% for participant in map.war.participant_set.all %}
-      {{participant.id}}: {name: '{{participant.name}}', color: '{{participant.color}}'}{% if not forloop.last %},{% endif %}
+var participants = {
+{% for aid, participants in map.participants.items %}
+  {{aid}}: [
+    {% for participant in participants %}
+    { pid:{{participant.pid}}, name:'{{participant.name}}', d1:'{{participant.d1 | date:'Y-m-d H:i:s'}}', d2:'{{participant.d2 | date:'Y-m-d H:i:s'}}', color: '{{participant.color}}' }{% if not forloop.last %},{% endif %}
     {% endfor %}
+  ]{% if not forloop.last %},{% endif %}
+{% endfor %}
+}
+
+var getParticipant = function(aid, date){
+  values = participants[aid]
+  if(values){
+      for(index in values){
+          var p = values[index]
+          if(p.d1 < date && date <= p.d2){
+             return p;
+          }
+      }
   }
+  return null;
+}
 
-  var ownership = {
-    {% for sid, owns in map.ownership.items %}
-    '{{sid}}': [
-      {% for own in owns %}{m:{{own.m}},pid:{{own.pid}},d1:'{{own.d1 | date:'Y-m-d H:i:s'}}',d2:'{{own.d2 | date:'Y-m-d H:i:s'}}'}{% if not forloop.last %},{% endif %}{% endfor %}
-    ]{% if not forloop.last %},{% endif %}
-    {% endfor %}
-  };
+var ownership = {
+{% for sid, owns in map.ownership.items %}
+'{{sid}}': [
+  {% for own in owns %}{m:{{own.m}},aid:{{own.aid}},d1:'{{own.d1 | date:'Y-m-d H:i:s'}}',d2:'{{own.d2 | date:'Y-m-d H:i:s'}}'}{% if not forloop.last %},{% endif %}{% endfor %}
+]{% if not forloop.last %},{% endif %}
+{% endfor %}
+};
 
+var showOwnership = function(){
+  var sDate = $('#date').val();
   for(k in ownership){
-    var values = ownership[k],
-        last = values[values.length-1]
-        desc = getOrCalc(last.m);
+      var values = ownership[k],
+          owner = getOwnerOnDate(values,sDate);
 
-    el = $("#"+k)
-    if(last.pid){
-      part = participants[last.pid];
-      el.attr('d', desc);
-      el.attr('fill', part.color);
-      el.attr('fill-opacity', 0.5);
-    }else{
-      el.attr('d', desc);
-      el.attr('fill', "url(#diagonalHatch)");
-      el.attr('fill-opacity', 1);
-    }
+      el = $("."+k)
+      if(owner == null){
+          el.attr('d', '' );
+      }else{
+          participant = getParticipant(owner.aid, sDate)
+          desc = getOrCalc(owner.m);
+          if(participant){
+              el.attr('d', desc );
+              el.attr('fill', participant.color);
+              el.attr('fill-opacity', 0.5);
+          }else{
+              el.attr('d', desc);
+              el.attr('fill', "url(#diagonalHatch)");
+              el.attr('fill-opacity', 1);
+          }
+      }
   };
+}
 
+$(function(){
+  var date = new Date();
+  $('#date').val(date.toISOString().split('T').join(' ').split('.')[0]);
 
+  showOwnership();
 });
+
 </script>
 
 <h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ map.war.name }} / Powers & Maps</h4>
+
+<div class="row">
+    <div class="col-md-3">
+        <form-group>
+            <label for="date">Date</label>
+            <input id="date" type="text">
+            <button class="btn btn-default" onclick="showOwnership()"> &gt;&gt;&gt; </button>
+        </form-group>
+    </div>
+</div>
+
 
 <h3>Participants</h3>
     {% for participant in map.war.participant_set.all %}
@@ -77,7 +130,12 @@ $(function(){
         <li style="color:{{participant.color}}"><b>{{participant.name}}</b></li>
         <ul>
             {% for alliance in participant.info.alliances %}
-            <li style="color:{{participant.color}}">{{alliance.alliance_name}}</li>
+            <li>
+                <span style="color:{{participant.color}}">{{alliance.alliance_name}}</span>
+                {% ifnotequal alliance.date2 '9999-12-31 23:59:59' %}
+                    {{alliance.date2}}
+                {% endifnotequal %}
+            </li>
             {% endfor %}
         </ul>
     </ul>
@@ -88,7 +146,9 @@ $(function(){
 <h3>Territories</h3>
 
 {% for tid, tinfo in map.war_systems.items %}
-<h4>{{tinfo.territory.name}}</h4>
+<h4>{{tinfo.territory.name}} </h4>
+<label for="showtext{{tid}}">Show system names</label><input id="showtext{{tid}}" type="checkbox" autocomplete="off" checked="checked" onclick="toogleSystemNames({{tid}})"/>
+<br>
 {% for region in tinfo.territory.regions %}
 <span class="btn-my">{{region.name}}</span>
 {% endfor %}
@@ -107,9 +167,9 @@ $(function(){
 
     {% for sid, system in tinfo.systems.items %}
     <circle cx="{{system.sx|floatformat}}" cy="{{system.sz|floatformat}}" r="2" />
-    <path id="s{{sid}}hub" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(60, 0, 0)"/>
-    <path id="s{{sid}}tcu" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(180, 0, 0)"/>
-    <path id="s{{sid}}sta" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(300, 0, 0)"/>
+    <path class="s{{sid}}h" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(60, 0, 0)"/>
+    <path class="s{{sid}}t" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(180, 0, 0)"/>
+    <path class="s{{sid}}s" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(300, 0, 0)"/>
     {% endfor %}
 
     {% for sid, system in tinfo.systems.items %}
