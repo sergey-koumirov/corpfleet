@@ -77,34 +77,94 @@ var ownership = {
 {% endfor %}
 };
 
+
+var setStyle = function(el, desc, fill, opacity, stroke, dasharray){
+    el.attr('d', desc );
+    el.attr('fill', fill);
+    el.attr('fill-opacity', opacity);
+    el.attr('stroke', stroke);
+    el.attr('stroke-opacity', opacity + (1.0 - opacity)/3.0 );
+    if(dasharray){
+        el.attr('stroke-dasharray', dasharray);
+    }
+}
+
 var showOwnership = function(){
   var sDate = $('#date').val();
   for(k in ownership){
       var values = ownership[k],
-          owner = getOwnerOnDate(values,sDate);
+          owner = getOwnerOnDate(values,sDate),
+          el = $("."+k);
 
-      el = $("."+k)
       if(owner == null){
           el.attr('d', '' );
       }else{
-          participant = getParticipant(owner.aid, sDate)
-          desc = getOrCalc(owner.m);
+          var participant = getParticipant(owner.aid, sDate),
+              desc = getOrCalc(owner.m);
           if(participant){
-              el.attr('d', desc );
-              el.attr('fill', participant.color);
-              el.attr('fill-opacity', 0.5);
+              setStyle(el, desc, participant.color, 0.5, participant.color)
           }else{
-              el.attr('d', desc);
-              el.attr('fill', "url(#diagonalHatch)");
-              el.attr('fill-opacity', 1);
+              setStyle(el, desc, "url(#diagonalHatch)", 0.5, '#808080')
           }
       }
-  };
+  }
+}
+
+var showDiffOwnership = function(){
+    var sDate1 = $('#date1').val(),
+        sDate2 = $('#date2').val();
+    for(k in ownership){
+        var values = ownership[k],
+            owner1 = getOwnerOnDate(values,sDate1),
+            owner2 = getOwnerOnDate(values,sDate2),
+            el = $("."+k),
+            participant1 = null,
+            participant2 = null;
+
+        if(owner1 != null ){ participant1 = getParticipant(owner1.aid, sDate1); }
+        if(owner2 != null ){ participant2 = getParticipant(owner2.aid, sDate2); }
+
+        if(owner1 != null && owner2 == null){
+            var desc = getOrCalc(owner1.m);
+            if(participant1==null){
+                setStyle(el, desc, "url(#tilePatternX)", 0.5, '#808080', '2 2');
+            }else{
+                setStyle(el, desc, "url(#tilePattern"+participant1.pid+")", 0.5, participant1.color, '2 2');
+            }
+        }else if(
+            owner1 == null && owner2 != null ||
+            (
+                owner1 != null && owner2 != null && (
+                    participant1==null && participant2!=null ||
+                    participant1!=null && participant2==null ||
+                    participant1!=null && participant2!=null && participant1.pid != participant2.pid
+                )
+            )
+        ){
+            var desc = getOrCalc(owner2.m);
+            if(participant2==null){
+                setStyle(el, desc, "#808080", 0.5, '#808080');
+            }else{
+                setStyle(el, desc, participant2.color, 0.5, participant2.color);
+            }
+        }else{
+            el.attr('d', '' );
+        }
+
+    };
 }
 
 $(function(){
-  var date = new Date();
+  var date = new Date()
+      date1 = new Date(date);
+
+  date1.setDate(date1.getDate() - 7);
+
   $('#date').val(date.toISOString().split('T').join(' ').split('.')[0]);
+
+  $('#date1').val(date1.toISOString().split('T').join(' ').split('.')[0]);
+
+  $('#date2').val(date.toISOString().split('T').join(' ').split('.')[0]);
 
   showOwnership();
 });
@@ -116,9 +176,17 @@ $(function(){
 <div class="row">
     <div class="col-md-3">
         <form-group>
-            <label for="date">Date</label>
+            <label for="date">On date</label>
             <input id="date" type="text">
             <button class="btn btn-default" onclick="showOwnership()"> &gt;&gt;&gt; </button>
+        </form-group>
+    </div>
+    <div class="col-md-6">
+        <form-group>
+            <label for="date">Date Diff</label>
+            <input id="date1" type="text">
+            <input id="date2" type="text">
+            <button class="btn btn-default" onclick="showDiffOwnership()"> &gt;&gt;&gt; </button>
         </form-group>
     </div>
 </div>
@@ -154,13 +222,6 @@ $(function(){
 {% endfor %}
 <br>
 <svg id="t{{tid}}" viewBox="-50 -50 1100 1100" width="1350" height="1350" style="border: 1px solid #404040">
-    <defs>
-        <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
-            <path d="M-1,1 l2,-2  M0,4 l4,-4  M3,5 l2,-2" style="stroke:#CCCCCC; stroke-width:1"/>
-        </pattern>
-    </defs>
-
-
     {% for link in tinfo.links %}
     <line x1="{{link.from.sx|floatformat}}" y1="{{link.from.sz|floatformat}}" x2="{{link.to.sx|floatformat}}" y2="{{link.to.sz|floatformat}}" />
     {% endfor %}
@@ -178,5 +239,36 @@ $(function(){
 </svg>
 
 {% endfor %}
+<svg>
+    <defs>
+        <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
+            <path d="M-1,1 l2,-2  M0,4 l4,-4  M3,5 l2,-2" style="stroke:#CCCCCC; stroke-width:1"/>
+        </pattern>
 
+        {% for participant in map.war.participant_set.all %}
+        <rect id="tileRect{{participant.id}}" x="0.5" y="0.5" width="3.0" height="3.0" fill="{{participant.color}}"/>
+        <pattern id                    = "tilePattern{{participant.id}}"
+                 x                     = "0"
+                 y                     = "0"
+                 width                 = "4"
+                 height                = "4"
+                 patternContentUnits   = "userSpaceOnUse"
+                 patternUnits          = "userSpaceOnUse">
+            <use xlink:href="#tileRect{{participant.id}}" />
+        </pattern>
+        {% endfor %}
+
+        <rect id="tileRectX" x="0.5" y="0.5" width="2.0" height="2.0" fill="#808080"/>
+        <pattern id                    = "tilePatternX"
+                 x                     = "0"
+                 y                     = "0"
+                 width                 = "4"
+                 height                = "4"
+                 patternContentUnits   = "userSpaceOnUse"
+                 patternUnits          = "userSpaceOnUse">
+            <use xlink:href="#tileRectX" />
+        </pattern>
+
+    </defs>
+</svg>
 {% endblock %}
