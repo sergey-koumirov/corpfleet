@@ -2,6 +2,8 @@ from django.core.management.base import BaseCommand, CommandError
 from preston.crest import Preston
 from cwo.models import Structure
 from cwo.models import Alliance
+from cwo.models import System
+from cwo.models import Region
 from django.utils import timezone
 from decimal import *
 import datetime
@@ -33,12 +35,16 @@ class Command(BaseCommand):
                 cs = current_hash[s.structureID]
                 defence = Decimal(s.vulnerabilityOccupancyLevel if 'vulnerabilityOccupancyLevel' in s.data else 0).quantize(Decimal('.01'))
                 if s.alliance.id != cs.alliance_id or defence != cs.defence:
-                    print('existing structure {} changed A: {}>{}  D: {}>{}'.format(s.structureID, cs.alliance_id, s.alliance.id, cs.defence, defence))
+                    db_system = System.objects.get(pk=s.solarSystem.id)
+                    db_region = Region.objects.get(pk=db_system.region_id)
+                    print('existing structure {} / {} changed A: {}>{}  D: {}>{}'.format(db_region.name, db_system.name, cs.alliance_id, s.alliance.id, cs.defence, defence))
                     cs.date2 = self.today
                     cs.save()
                     self.import_from_dict(s)
             else:
-                print('new structure {}'.format(s.structureID))
+                db_system = System.objects.get(pk=s.solarSystem.id)
+                db_region = Region.objects.get(pk=db_system.region_id)
+                print('new structure {} / {}'.format(db_region.name, db_system.name))
                 self.import_from_dict(s)
         print('done')
 
@@ -49,7 +55,9 @@ class Command(BaseCommand):
         print('deleting old...')
         for cs in current:
             if cs.structure_id not in snapshot_hash:
-                print('lost structure {}'.format(cs.structure_id))
+                db_system = System.objects.get(pk=cs.system_id)
+                db_region = Region.objects.get(pk=db_system.region_id)
+                print('lost structure {} / {}'.format(db_region.name, db_system.name))
                 cs.date2 = self.today
                 cs.save()
         print('done')
