@@ -12,25 +12,67 @@ var toogleSystemNames = function(tid){
 var pointsHash = {}
 var getOrCalc = function(adm){
   if( !pointsHash[adm] ){
-      var r1 = 4.0,
-          r2 = 4.0 + 2.0 + adm * 1.5,
-          desc = "";
-      points=[
-        {x: 0, y: r1},
-        {x: r1 * Math.cos( Math.PI/6 ), y: r1 * Math.sin( Math.PI/6 )},
-        {x: r2 * Math.cos( Math.PI/6 ), y: r2 * Math.sin( Math.PI/6 )},
-        {x: 0, y: r2},
-        {x: r2 * Math.cos( 5*Math.PI/6 ), y: r2 * Math.sin( 5*Math.PI/6 )},
-        {x: r1 * Math.cos( 5*Math.PI/6 ), y: r1 * Math.sin( 5*Math.PI/6 )}
-      ]
 
-      $.each(points, function(i,el){
-        if(i==0){
-          desc = "M "+el.x+" "+el.y+" ";
-        }else{
-          desc = desc + "L "+el.x+" "+el.y+" ";
-        }
-      });
+      if(adm==0){
+          var r1 = 4.0, r2 = 8, desc = "",
+              a0 = Math.PI/6*1.5,
+              a1 = Math.PI/6*2.0,
+              a2 = Math.PI/6*2.5,
+              a3 = Math.PI/6*3.0,
+              a4 = Math.PI/6*3.5,
+              a5 = Math.PI/6*4.0,
+              a6 = Math.PI/6*4.5;
+
+          points=[
+            [{x: r1 * Math.cos(a0), y: r1 * Math.sin(a0)},
+             {x: r2 * Math.cos(a0), y: r2 * Math.sin(a0)}],
+
+            [{x: r1 * Math.cos(a1), y: r1 * Math.sin(a1)},
+             {x: r2 * Math.cos(a1), y: r2 * Math.sin(a1)}],
+
+            [{x: r1 * Math.cos(a2), y: r1 * Math.sin(a2)},
+             {x: r2 * Math.cos(a2), y: r2 * Math.sin(a2)}],
+
+            [{x: r1 * Math.cos(a3), y: r1 * Math.sin(a3)},
+             {x: r2 * Math.cos(a3), y: r2 * Math.sin(a3)}],
+
+            [{x: r1 * Math.cos(a4), y: r1 * Math.sin(a4)},
+             {x: r2 * Math.cos(a4), y: r2 * Math.sin(a4)}],
+
+            [{x: r1 * Math.cos(a5), y: r1 * Math.sin(a5)},
+             {x: r2 * Math.cos(a5), y: r2 * Math.sin(a5)}],
+
+            [{x: r1 * Math.cos(a6), y: r1 * Math.sin(a6)},
+             {x: r2 * Math.cos(a6), y: r2 * Math.sin(a6)}]
+
+          ]
+          $.each(points, function(i,el){
+            desc = desc + "M "+el[0].x+" "+el[0].y+" L "+el[1].x+" "+el[1].y+" ";
+          });
+
+      }else{
+          var r1 = 4.0,
+              r2 = 4.0 + 2.0 + adm * 1.5,
+              desc = "";
+          points=[
+            {x: 0, y: r1},
+            {x: r1 * Math.cos( Math.PI/6 ), y: r1 * Math.sin( Math.PI/6 )},
+            {x: r2 * Math.cos( Math.PI/6 ), y: r2 * Math.sin( Math.PI/6 )},
+            {x: 0, y: r2},
+            {x: r2 * Math.cos( 5*Math.PI/6 ), y: r2 * Math.sin( 5*Math.PI/6 )},
+            {x: r1 * Math.cos( 5*Math.PI/6 ), y: r1 * Math.sin( 5*Math.PI/6 )}
+          ]
+          $.each(points, function(i,el){
+            if(i==0){
+              desc = "M "+el.x+" "+el.y+" ";
+            }else{
+              desc = desc + "L "+el.x+" "+el.y+" ";
+            }
+          });
+      }
+
+
+
       pointsHash[adm] = desc;
   }
   return pointsHash[adm];
@@ -234,7 +276,7 @@ $(function(){
     {% endfor %}
 
     {% for sid, system in tinfo.systems.items %}
-    <text x="{{system.sx|floatformat}}" dx="10" y="{{system.sz|floatformat}}" dy="4">{{system.name}}</text>
+    <text x="{{system.sx|floatformat}}" dx="11" y="{{system.sz|floatformat}}" dy="2">{{system.name}}</text>
     {% endfor %}
 </svg>
 
