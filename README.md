@@ -11,3 +11,4 @@ pip3 install mysqlclient
 pip3 install sqlparse
 pip3 install preston
 
+python manage.py createsuperuser --username=joe --email=joe@example.com
