@@ -14,7 +14,7 @@ var getOrCalc = function(adm){
   if( !pointsHash[adm] ){
 
       if(adm==0){
-          var r1 = 4.0, r2 = 8, desc = "",
+          var r1 = 4.0, r2 = 9, desc = "",
               a0 = Math.PI/6*1.5,
               a1 = Math.PI/6*2.0,
               a2 = Math.PI/6*2.5,
@@ -60,7 +60,8 @@ var getOrCalc = function(adm){
             {x: r2 * Math.cos( Math.PI/6 ), y: r2 * Math.sin( Math.PI/6 )},
             {x: 0, y: r2},
             {x: r2 * Math.cos( 5*Math.PI/6 ), y: r2 * Math.sin( 5*Math.PI/6 )},
-            {x: r1 * Math.cos( 5*Math.PI/6 ), y: r1 * Math.sin( 5*Math.PI/6 )}
+            {x: r1 * Math.cos( 5*Math.PI/6 ), y: r1 * Math.sin( 5*Math.PI/6 )},
+            {x: 0, y: r1}
           ]
           $.each(points, function(i,el){
             if(i==0){

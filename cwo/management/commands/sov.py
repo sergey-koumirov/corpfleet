@@ -8,47 +8,50 @@ from django.utils import timezone
 from decimal import *
 import datetime
 import pprint
-
+import requests
 
 class Command(BaseCommand):
     help = 'Update Sov Info'
 
     def handle(self, *args, **options):
-        self.preston = Preston()
-        self.today = timezone.now()
-        self.end_of_time = datetime.datetime(9999, 12, 31, 23, 59, 59, tzinfo=self.today.tzinfo)
+        try:
+            self.preston = Preston()
+            self.today = timezone.now()
+            self.end_of_time = datetime.datetime(9999, 12, 31, 23, 59, 59, tzinfo=self.today.tzinfo)
 
-        alliances, current, current_hash, snapshot = self.preload()
+            alliances, current, current_hash, snapshot = self.preload()
 
-        print('processing...')
-        snapshot_hash = {}
-        for s in snapshot.items:
-            snapshot_hash[s.structureID] = s
+            print('processing...')
+            snapshot_hash = {}
+            for s in snapshot.items:
+                snapshot_hash[s.structureID] = s
 
-            if s.alliance.id not in alliances:
-                print('new alliance {}'.format(s.alliance.name))
-                alliance = Alliance(id=s.alliance.id, name=s.alliance.name)
-                alliance.save()
-                alliances[s.alliance.id] = alliance
+                if s.alliance.id not in alliances:
+                    print('new alliance {}'.format(s.alliance.name))
+                    alliance = Alliance(id=s.alliance.id, name=s.alliance.name)
+                    alliance.save()
+                    alliances[s.alliance.id] = alliance
 
-            if s.structureID in current_hash:
-                cs = current_hash[s.structureID]
-                defence = Decimal(s.vulnerabilityOccupancyLevel if 'vulnerabilityOccupancyLevel' in s.data else 0).quantize(Decimal('.01'))
-                if s.alliance.id != cs.alliance_id or defence != cs.defence:
+                if s.structureID in current_hash:
+                    cs = current_hash[s.structureID]
+                    defence = Decimal(s.vulnerabilityOccupancyLevel if 'vulnerabilityOccupancyLevel' in s.data else 0).quantize(Decimal('.01'))
+                    if s.alliance.id != cs.alliance_id or defence != cs.defence:
+                        db_system = System.objects.get(pk=s.solarSystem.id)
+                        db_region = Region.objects.get(pk=db_system.region_id)
+                        print('existing structure {} / {} changed A: {}>{}  D: {}>{}'.format(db_region.name, db_system.name, cs.alliance_id, s.alliance.id, cs.defence, defence))
+                        cs.date2 = self.today
+                        cs.save()
+                        self.import_from_dict(s)
+                else:
                     db_system = System.objects.get(pk=s.solarSystem.id)
                     db_region = Region.objects.get(pk=db_system.region_id)
-                    print('existing structure {} / {} changed A: {}>{}  D: {}>{}'.format(db_region.name, db_system.name, cs.alliance_id, s.alliance.id, cs.defence, defence))
-                    cs.date2 = self.today
-                    cs.save()
+                    print('new structure {} / {}'.format(db_region.name, db_system.name))
                     self.import_from_dict(s)
-            else:
-                db_system = System.objects.get(pk=s.solarSystem.id)
-                db_region = Region.objects.get(pk=db_system.region_id)
-                print('new structure {} / {}'.format(db_region.name, db_system.name))
-                self.import_from_dict(s)
-        print('done')
+            print('done')
 
-        self.delete_old(current, snapshot_hash)
+            self.delete_old(current, snapshot_hash)
+        except requests.exceptions.ConnectionError:
+            print('server offline')
 
 
     def delete_old(self, current, snapshot_hash):
