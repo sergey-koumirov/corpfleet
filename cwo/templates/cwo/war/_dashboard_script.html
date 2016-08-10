@@ -210,53 +210,41 @@ $(function(){
     $('#date2').val(date.toISOString().split('T').join(' ').split('.')[0]);
     showOwnership();
 
-$('#timeline1').highcharts({
+    {% for tid, tinfo in map.territories.items %}
+    $('#timeline{{tid}}').highcharts({
         chart: { type: 'line' },
         title: null,
         subtitle: null,
         xAxis: {
             type: 'datetime',
-            dateTimeLabelFormats: {
-            },
-            title: {
-                text: 'Date'
-            }
+            title: { text: 'Date'}
         },
         yAxis: {
-            title: {
-                text: 'Sov Power'
-            },
+            title: { text: 'Sov Power' },
             min: 0
         },
-        tooltip: {
-            enabled: false
-        },
-
+        tooltip: { enabled: false },
         plotOptions: {
             line: {
                 enableMouseTracking: false,
                 animation: false,
-                marker: {
-                    enabled: false
-                }
+                marker: { enabled: false }
             }
         },
-
         series: [
-            {% for participant in map.war.participant_set.all %}
+            {% for pid, pinfo in tinfo.powers.items %}
             {
-                name: "{{participant.name}}",
-                color: "{{participant.color}}",
+                name: "{{pinfo.name}}",
+                color: "{{pinfo.color}}",
                 data:[
-                    {% for d in participant.data %}
-                    [{{d.date}}, {{d.value}}]{% if not forloop.last %},{% endif %}
+                    {% for d in pinfo.data %}[{{d.date}}, {{d.adm}}]{% if not forloop.last %},{% endif %}
                     {% endfor %}
                 ]
             }{% if not forloop.last %},{% endif %}
             {% endfor %}
         ]
     });
-
+    {% endfor %}
 
 });
 

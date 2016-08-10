@@ -42,15 +42,6 @@ class Participant(models.Model):
             'alliances': [pa.info() for pa in self.participantalliance_set.all()]
         }
 
-    def data(self):
-        return [
-            {'date': 'Date.UTC(1970, 10, 4)', 'value': random.random()*100 },
-            {'date': 'Date.UTC(1970, 10, 5)', 'value': random.random()*100 },
-            {'date': 'Date.UTC(1970, 10, 7)', 'value': random.random()*100 },
-            {'date': 'Date.UTC(1970, 10, 10)', 'value': random.random()*100 },
-            {'date': 'Date.UTC(1970, 10, 20)', 'value': random.random()*100 },
-        ]
-
 
 class ParticipantAlliance(models.Model):
     id = models.AutoField(primary_key=True)

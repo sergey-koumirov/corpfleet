@@ -4,6 +4,7 @@ from cwo.models import Structure
 from cwo.models import Region
 from django.db import connection
 import datetime
+from django.utils import timezone
 
 class WarMap:
 
@@ -122,10 +123,83 @@ class WarMap:
             result[t.id] = {
                 'id': t.id,
                 'name': t.name,
-                'regions': Region.objects.raw('select r.* from cwo_region r where r.id in (select tr.region_id from cwo_territoryregion tr where tr.territory_id = %s)', [t.id])
+                'regions': Region.objects.raw('select r.* from cwo_region r where r.id in (select tr.region_id from cwo_territoryregion tr where tr.territory_id = %s)', [t.id]),
+                'powers': self.powers(t.id)
+            }
+        return result
+
+    def powers(self, tid):
+        sql = (
+            'select d, sum(x.adm) as power'
+            '  from( SELECT s1.id, s1.alliance_id, s1.defence as adm, GREATEST(s1.date1, pa1.date1) as d '
+            '          FROM cwo_dev.cwo_structure s1, '
+            '               cwo_participantalliance pa1 '
+            '               where pa1.alliance_id = s1.alliance_id '
+            '                 and pa1.participant_id = %(pid)s '
+            '                 and pa1.date1 <= s1.date2 '
+            '                 and pa1.date2 >= s1.date1 '
+            '                 and s1.system_id in (select id '
+            '                                        from cwo_system '
+            '                                        where region_id in (select region_id from cwo_territoryregion where territory_id = %(tid)s) '
+            '                                      ) '
+            '        union '
+            '        SELECT s2.id, s2.alliance_id, -1*s2.defence as adm, LEAST(s2.date2, pa2.date2) as d '
+            '          FROM cwo_dev.cwo_structure s2, '
+            '               cwo_participantalliance pa2 '
+            '          where pa2.alliance_id = s2.alliance_id '
+            '            and pa2.participant_id = %(pid)s '
+            '            and pa2.date1 <= s2.date2 '
+            '            and pa2.date2 >= s2.date1 '
+            '            and s2.system_id in (select id '
+            '                                   from cwo_system '
+            '                                   where region_id in (select region_id from cwo_territoryregion where territory_id = %(tid)s) '
+            '                                ) '
+            '  ) x '
+            '  where d < \'9999-12-13\''
+            '  group by d '
+            '  order by d '
+        )
+
+        result = {}
+        for p in self.war.participant_set.all():
+            cursor = connection.cursor()
+            cursor.execute(sql, {'tid': tid, 'pid': p.id})
+            power = 0
+            data=[]
+            for record in cursor.fetchall():
+                power = power + record[1]
+                data.append({
+                    'date': 'Date.UTC({}, {}, {}, {}, {}, {})'.format(
+                        record[0].year,
+                        record[0].month-1,
+                        record[0].day,
+                        record[0].hour,
+                        record[0].minute,
+                        record[0].second
+                    ),
+                    'adm': power
+                })
+            today = timezone.now()
+            data.append({
+                'date': 'Date.UTC({}, {}, {}, {}, {}, {})'.format(
+                    today.year,
+                    today.month-1,
+                    today.day,
+                    today.hour,
+                    today.minute,
+                    today.second
+                ),
+                'adm': power
+            })
+
+            result[p.id] = {
+                'name': p.name,
+                'color': p.color,
+                'data': data,
             }
 
         return result
+
 
     def ownership(self):
         sql = (

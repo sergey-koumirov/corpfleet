@@ -48,10 +48,10 @@
 
 <hr class="clear">
 
-<h3>Territories</h3>
+<h2>Territories</h2>
 
 {% for tid, tinfo in map.war_systems.items %}
-<h4>{{tinfo.territory.name}} </h4>
+<h3>{{tinfo.territory.name}} </h3>
 <div id="timeline{{tid}}" style="height: 400px; min-width: 800px"></div>
 <label for="showtext{{tid}}">Show system names</label><input id="showtext{{tid}}" type="checkbox" autocomplete="off" checked="checked" onclick="toogleSystemNames({{tid}})"/>
 <br>
