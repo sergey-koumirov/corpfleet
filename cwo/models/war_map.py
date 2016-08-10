@@ -169,34 +169,20 @@ class WarMap:
             for record in cursor.fetchall():
                 power = power + record[1]
                 data.append({
-                    'date': 'Date.UTC({}, {}, {}, {}, {}, {})'.format(
-                        record[0].year,
-                        record[0].month-1,
-                        record[0].day,
-                        record[0].hour,
-                        record[0].minute,
-                        record[0].second
-                    ),
+                    'date': record[0].timestamp()*1000,
                     'adm': power
                 })
-            today = timezone.now()
-            data.append({
-                'date': 'Date.UTC({}, {}, {}, {}, {}, {})'.format(
-                    today.year,
-                    today.month-1,
-                    today.day,
-                    today.hour,
-                    today.minute,
-                    today.second
-                ),
-                'adm': power
-            })
+            if len(data)>0:
+                data.append({
+                    'date': timezone.now().timestamp()*1000,
+                    'adm': power
+                })
 
-            result[p.id] = {
-                'name': p.name,
-                'color': p.color,
-                'data': data,
-            }
+                result[p.id] = {
+                    'name': p.name,
+                    'color': p.color,
+                    'data': data,
+                }
 
         return result
 

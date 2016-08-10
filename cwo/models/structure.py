@@ -13,7 +13,7 @@ class Structure(models.Model):
     alliance_id = models.BigIntegerField()
     defence = models.DecimalField(max_digits=5, decimal_places=2)
     structure_id = models.BigIntegerField()
-    system_id = models.BigIntegerField()
+    system_id = models.BigIntegerField(db_index=True)
     type_id = models.BigIntegerField()
     date1 = models.DateTimeField()
     date2 = models.DateTimeField()

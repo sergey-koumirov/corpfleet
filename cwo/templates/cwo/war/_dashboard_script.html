@@ -84,15 +84,9 @@ var getOwnerOnDate = function(owners, date){
   return null;
 }
 
-var participants = {
-{% for aid, participants in map.participants.items %}
-  {{aid}}: [
-    {% for participant in participants %}
-    { pid:{{participant.pid}}, name:'{{participant.name}}', d1:'{{participant.d1 | date:'Y-m-d H:i:s'}}', d2:'{{participant.d2 | date:'Y-m-d H:i:s'}}', color: '{{participant.color}}' }{% if not forloop.last %},{% endif %}
-    {% endfor %}
-  ]{% if not forloop.last %},{% endif %}
-{% endfor %}
-}
+var participants = {{% for aid, participants in map.participants.items %}
+{{aid}}: [{% for participant in participants %}{ pid:{{participant.pid}}, name:'{{participant.name}}', d1:'{{participant.d1 | date:'Y-m-d H:i:s'}}', d2:'{{participant.d2 | date:'Y-m-d H:i:s'}}', color: '{{participant.color}}' }{% if not forloop.last %},{% endif %}{% endfor %}]{% if not forloop.last %},{% endif %}
+{% endfor %}}
 
 var getParticipant = function(aid, date){
   values = participants[aid]
@@ -108,10 +102,7 @@ var getParticipant = function(aid, date){
 }
 
 var ownership = {
-{% for sid, owns in map.ownership.items %}
-'{{sid}}': [
-  {% for own in owns %}{m:{{own.m}},aid:{{own.aid}},d1:'{{own.d1 | date:'Y-m-d H:i:s'}}',d2:'{{own.d2 | date:'Y-m-d H:i:s'}}'}{% if not forloop.last %},{% endif %}{% endfor %}
-]{% if not forloop.last %},{% endif %}
+{% for sid, owns in map.ownership.items %}'{{sid}}': [{% for own in owns %}{m:{{own.m}},aid:{{own.aid}},d1:'{{own.d1 | date:'Y-m-d H:i:s'}}',d2:'{{own.d2 | date:'Y-m-d H:i:s'}}'}{% if not forloop.last %},{% endif %}{% endfor %}]{% if not forloop.last %},{% endif %}
 {% endfor %}
 };
 
@@ -237,8 +228,8 @@ $(function(){
                 name: "{{pinfo.name}}",
                 color: "{{pinfo.color}}",
                 data:[
-                    {% for d in pinfo.data %}[{{d.date}}, {{d.adm}}]{% if not forloop.last %},{% endif %}
-                    {% endfor %}
+{% for d in pinfo.data %}[{{d.date}}, {{d.adm}}]{% if not forloop.last %},{% endif %}
+{% endfor %}
                 ]
             }{% if not forloop.last %},{% endif %}
             {% endfor %}
