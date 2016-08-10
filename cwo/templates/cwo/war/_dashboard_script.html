@@ -200,18 +200,64 @@ var showDiffOwnership = function(){
 }
 
 $(function(){
-  var date = new Date()
-      date1 = new Date(date);
+    var date = new Date()
+        date1 = new Date(date);
 
-  date1.setDate(date1.getDate() - 7);
+    date1.setDate(date1.getDate() - 7);
 
-  $('#date').val(date.toISOString().split('T').join(' ').split('.')[0]);
+    $('#date').val(date.toISOString().split('T').join(' ').split('.')[0]);
+    $('#date1').val(date1.toISOString().split('T').join(' ').split('.')[0]);
+    $('#date2').val(date.toISOString().split('T').join(' ').split('.')[0]);
+    showOwnership();
 
-  $('#date1').val(date1.toISOString().split('T').join(' ').split('.')[0]);
+$('#timeline1').highcharts({
+        chart: { type: 'line' },
+        title: null,
+        subtitle: null,
+        xAxis: {
+            type: 'datetime',
+            dateTimeLabelFormats: {
+            },
+            title: {
+                text: 'Date'
+            }
+        },
+        yAxis: {
+            title: {
+                text: 'Sov Power'
+            },
+            min: 0
+        },
+        tooltip: {
+            enabled: false
+        },
 
-  $('#date2').val(date.toISOString().split('T').join(' ').split('.')[0]);
+        plotOptions: {
+            line: {
+                enableMouseTracking: false,
+                animation: false,
+                marker: {
+                    enabled: false
+                }
+            }
+        },
 
-  showOwnership();
+        series: [
+            {% for participant in map.war.participant_set.all %}
+            {
+                name: "{{participant.name}}",
+                color: "{{participant.color}}",
+                data:[
+                    {% for d in participant.data %}
+                    [{{d.date}}, {{d.value}}]{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    });
+
+
 });
 
 </script>

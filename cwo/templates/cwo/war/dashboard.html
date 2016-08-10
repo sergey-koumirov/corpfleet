@@ -3,6 +3,9 @@
 
 {% block content %}
 
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+
 {% include "cwo/war/_dashboard_script.html" with map=map %}
 
 <h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ map.war.name }} / Powers & Maps</h4>
@@ -49,6 +52,7 @@
 
 {% for tid, tinfo in map.war_systems.items %}
 <h4>{{tinfo.territory.name}} </h4>
+<div id="timeline{{tid}}" style="height: 400px; min-width: 800px"></div>
 <label for="showtext{{tid}}">Show system names</label><input id="showtext{{tid}}" type="checkbox" autocomplete="off" checked="checked" onclick="toogleSystemNames({{tid}})"/>
 <br>
 {% for region in tinfo.territory.regions %}
