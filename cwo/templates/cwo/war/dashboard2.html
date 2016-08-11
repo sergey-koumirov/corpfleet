@@ -3,17 +3,35 @@
 
 {% block content %}
 
-<div id="container" style="width: 800px; height: 800px; border: 1px solid #000000"></div>
+<svg id="test" viewBox="-50 -50 1100 1100" width="1350" height="1350" style="border: 1px solid #404040">
 
-<script src="{% static 'sigma/sigma.js' %}"></script>
+</svg>
+
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+
 <script>
-    var s = new sigma('container');
+    d3.json( '/wars/1/dashboard/systems', function (json) {
+        console.debug('loading...', json.nodes);
+        d3.select("#test")
+            .selectAll("circle")
+            .data(json.nodes)
+            .enter().append("circle")
+                .attr("cx", function(d) { return d.x; })
+                .attr("cy", function(d) { return d.y; })
+                .attr("r", 2.5);
 
-    s.graph.
-        addNode({id: 'n0', label: 'Hello', x: 0.1, y: 0.1, size: 1, color: '#f00'}).
-        addNode({id: 'n1', label: 'World !', x: 0.9, y: 0.9, size: 1, color: '#00f'}).
-        addEdge({id: 'e0', source: 'n0', target: 'n1'});
-    s.refresh();
+        d3.select("#test")
+            .selectAll("text")
+            .data(json.nodes)
+            .enter().append("text")
+                .attr("x", function(d) { return d.x; })
+                .attr("y", function(d) { return d.y; })
+                .text(function(d) { return d.label; });
+
+
+        console.debug('loaded');
+    });
 </script>
 
 {% endblock %}

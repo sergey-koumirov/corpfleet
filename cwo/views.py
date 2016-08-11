@@ -231,6 +231,7 @@ def war_dashboard(request, war_id):
         war = War.objects.get(pk=war_id)
         t = time.time()
         map = WarMap(war)
+        map.load()
         elapsed_time = time.time() - t
         print('elapsed_time: ',elapsed_time)
         return render(request, 'cwo/war/dashboard.html', {'map': map})
@@ -245,5 +246,13 @@ def war_dashboard2(request, war_id):
         elapsed_time = time.time() - t
         print('elapsed_time: ',elapsed_time)
         return render(request, 'cwo/war/dashboard2.html', {'map': map})
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+def war_dashboard_systems(equest, war_id):
+    try:
+        war = War.objects.get(pk=war_id)
+        map = WarMap(war)
+        return HttpResponse(json.dumps(map.systems_json()), content_type="application/json")
     except War.DoesNotExist:
         raise Http404("War does not exist")

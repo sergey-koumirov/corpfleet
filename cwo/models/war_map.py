@@ -10,6 +10,8 @@ class WarMap:
 
     def __init__(self, war):
         self.war = war
+
+    def load(self):
         self._minmax = self.minmax()
         self.ownership = self.ownership()
 
@@ -45,6 +47,16 @@ class WarMap:
         result = {}
         for s in System.objects.raw('SELECT s.* FROM cwo_system s '):
             result[s.id]=s
+        return result
+
+    def systems_json(self):
+        result = {
+            "nodes": [],
+            "edges":[],
+        }
+        nodes = result["nodes"]
+        for s in System.objects.raw('SELECT s.* FROM cwo_system s where s.id < 31000000 '):
+            nodes.append({'id': s.id, 'label': s.name, 'x': s.x/1000000000000000, 'y':s.z/1000000000000000, 'color': '#ff0000'})
         return result
 
     def system_on_territory(self, system_id, territory_id):
