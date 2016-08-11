@@ -230,20 +230,8 @@ def war_regions(request):
 def war_dashboard(request, war_id):
     try:
         war = War.objects.get(pk=war_id)
-        t = time.time()
         map = WarMap(war)
-        map.load()
-        elapsed_time = time.time() - t
-        print('elapsed_time: ',elapsed_time)
-        return render(request, 'cwo/war/dashboard.html', {'map': map})
-    except War.DoesNotExist:
-        raise Http404("War does not exist")
-
-def war_dashboard2(request, war_id):
-    try:
-        war = War.objects.get(pk=war_id)
-        map = WarMap(war)
-        return render(request, 'cwo/war/dashboard2.html', {'war': war, 'territories': map.territories_as_json()})
+        return render(request, 'cwo/war/dashboard.html', {'war': war, 'territories': map.territories_as_json()})
     except War.DoesNotExist:
         raise Http404("War does not exist")
 

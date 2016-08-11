@@ -3,19 +3,15 @@
 
 {% block content %}
 
-<script src="https://code.highcharts.com/stock/highstock.js"></script>
-<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 
-{% include "cwo/war/_dashboard_script.html" with map=map %}
-
-<h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ map.war.name }} / Powers & Maps</h4>
+<h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ war.name }} / Powers & Maps</h4>
 
 <div class="row">
     <div class="col-md-3">
         <form-group>
             <label for="date">On date</label>
             <input id="date" type="text">
-            <button class="btn btn-default" onclick="showOwnership()"> &gt;&gt;&gt; </button>
+            <button class="btn btn-default" onclick="showOwnership(gOwnership, gParticipants)"> &gt;&gt;&gt; </button>
         </form-group>
     </div>
     <div class="col-md-6">
@@ -28,9 +24,8 @@
     </div>
 </div>
 
-
-<h3>Participants</h3>
-{% for participant in map.war.participant_set.all %}
+<h2>Participants</h2>
+{% for participant in war.participant_set.all %}
 <ul class="participant">
     <li style="color:{{participant.color}}"><b>{{participant.name}}</b></li>
     <ul>
@@ -50,37 +45,17 @@
 
 <h2>Territories</h2>
 
-{% for tid, tinfo in map.war_systems.items %}
-<h3>{{tinfo.territory.name}} </h3>
+{% for tid, ter in territories.items %}
+<h3>{{ter.name}}</h3>
 <div id="timeline{{tid}}" style="height: 400px; min-width: 800px"></div>
-<label for="showtext{{tid}}">Show system names</label><input id="showtext{{tid}}" type="checkbox" autocomplete="off" checked="checked" onclick="toogleSystemNames({{tid}})"/>
-<br>
-{% for region in tinfo.territory.regions %}
-<span class="btn-my">{{region.name}}</span>
-{% endfor %}
-<br>
-<svg id="t{{tid}}" viewBox="-50 -50 1100 1100" width="1350" height="1350" style="border: 1px solid #404040">
-{% for link in tinfo.links %}<line x1="{{link.from.sx|floatformat}}" y1="{{link.from.sz|floatformat}}" x2="{{link.to.sx|floatformat}}" y2="{{link.to.sz|floatformat}}" />
-{% endfor %}
-
-{% for sid, system in tinfo.systems.items %}<circle cx="{{system.sx|floatformat}}" cy="{{system.sz|floatformat}}" r="2" />
-<path class="s{{sid}}h" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(60, 0, 0)"/>
-<path class="s{{sid}}t" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(180, 0, 0)"/>
-<path class="s{{sid}}s" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(300, 0, 0)"/>
-{% endfor %}
-
-{% for sid, system in tinfo.systems.items %}<text class="s{{sid}}text" x="{{system.sx|floatformat}}" dx="11" y="{{system.sz|floatformat}}" dy="2">{{system.name}}</text>
-{% endfor %}
-</svg>
-
+<svg id="t{{tid}}" viewBox="-50 -50 1100 1100" width="1250" height="1250"></svg>
+<hr class="clear">
 {% endfor %}
 <svg>
     <defs>
-        <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
-            <path d="M-1,1 l2,-2  M0,4 l4,-4  M3,5 l2,-2" style="stroke:#CCCCCC; stroke-width:1"/>
-        </pattern>
+        <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4"><path d="M-1,1 l2,-2  M0,4 l4,-4  M3,5 l2,-2" style="stroke:#CCCCCC; stroke-width:1"/></pattern>
 
-        {% for participant in map.war.participant_set.all %}
+        {% for participant in war.participant_set.all %}
         <rect id="tileRect{{participant.id}}" x="0.5" y="0.5" width="3.0" height="3.0" fill="{{participant.color}}"/>
         <pattern id                    = "tilePattern{{participant.id}}"
                  x                     = "0"
@@ -108,5 +83,225 @@
 </svg>
 
 <image src="{% static 'legend.png' %}"/>
+
+
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+
+<script>
+    var setStyle = function(el, desc, fill, opacity, stroke, dasharray){
+        el.attr('d', desc );
+        el.attr('fill', fill);
+        el.attr('fill-opacity', opacity);
+        el.attr('stroke', stroke);
+        el.attr('stroke-opacity', opacity + (1.0 - opacity)/3.0 );
+        if(dasharray){
+            el.attr('stroke-dasharray', dasharray);
+        }
+    }
+
+    var pointsHash = {}
+    var getOrCalc = function(adm){
+        if( !pointsHash[adm] ){
+            var desc = "";
+            if(adm==0){
+                var r1 = 4.0, r2 = 9,
+                    a0 = Math.PI/6*1.5,
+                    points = [];
+
+                for(var i=0; i<=6; i++){
+                    var a = Math.PI/6*(1.5 + 0.5*i);
+                    desc = desc + "M "+(r1*Math.cos(a))+" "+(r1*Math.sin(a))+" L "+(r2*Math.cos(a))+" "+(r2*Math.sin(a))+" ";
+                }
+
+            }else{
+                var r1 = 4.0,
+                    r2 = 4.0 + 2.0 + adm * 1.5;
+                points=[
+                    {x: 0, y: r1},
+                    {x: r1 * Math.cos( Math.PI/6 ), y: r1 * Math.sin( Math.PI/6 )},
+                    {x: r2 * Math.cos( Math.PI/6 ), y: r2 * Math.sin( Math.PI/6 )},
+                    {x: 0, y: r2},
+                    {x: r2 * Math.cos( 5*Math.PI/6 ), y: r2 * Math.sin( 5*Math.PI/6 )},
+                    {x: r1 * Math.cos( 5*Math.PI/6 ), y: r1 * Math.sin( 5*Math.PI/6 )},
+                    {x: 0, y: r1}
+                ]
+                $.each(points, function(i,el){
+                    if(i==0){
+                      desc = "M "+el.x+" "+el.y+" ";
+                    }else{
+                      desc = desc + "L "+el.x+" "+el.y+" ";
+                    }
+                });
+            }
+            pointsHash[adm] = desc;
+        }
+        return pointsHash[adm];
+    }
+
+    var getParticipant = function(participants, aid, date){
+        values = participants[aid]
+        if(values){
+            for(index in values){
+                var p = values[index]
+                if(p.d1 < date && date <= p.d2){
+                   return p;
+                }
+            }
+        }
+        return null;
+    }
+
+    var getOwnerOnDate = function(owners, date){
+        for(index in owners){
+            var own = owners[index]
+            if(own.d1 < date && date <= own.d2){
+               return own;
+            }
+        }
+        return null;
+    }
+
+    var showOwnership = function(ownership, participants){
+        var sDate = $('#date').val();
+        for(k in ownership){
+            var values = ownership[k],
+                owner = getOwnerOnDate(values,sDate),
+                el = $("."+k);
+
+            if(owner == null){
+                el.attr('d', '' );
+            }else{
+                var participant = getParticipant(participants, owner.aid, sDate),
+                    desc = getOrCalc(owner.m);
+                if(participant){
+                    setStyle(el, desc, participant.color, 0.5, participant.color)
+                }else{
+                    setStyle(el, desc, "url(#diagonalHatch)", 0.5, '#808080')
+                }
+            }
+        }
+    }
+
+    var showDiffOwnership = function(){
+        var sDate1 = $('#date1').val(),
+            sDate2 = $('#date2').val();
+
+        for(k in gOwnership){
+            var values = gOwnership[k],
+                owner1 = getOwnerOnDate(values,sDate1),
+                owner2 = getOwnerOnDate(values,sDate2),
+                el = $("."+k),
+                participant1 = null,
+                participant2 = null;
+
+            if(owner1 != null ){ participant1 = getParticipant(gParticipants, owner1.aid, sDate1); }
+            if(owner2 != null ){ participant2 = getParticipant(gParticipants, owner2.aid, sDate2); }
+
+            if(owner1 != null && owner2 == null){
+                var desc = getOrCalc(owner1.m);
+                if(participant1==null){
+                    setStyle(el, desc, "url(#tilePatternX)", 0.5, '#808080', '2 2');
+                }else{
+                    setStyle(el, desc, "url(#tilePattern"+participant1.pid+")", 0.5, participant1.color, '2 2');
+                }
+                $('.'+k.slice(0,k.length-1)+'text').toggle(true);
+            }else if(
+                owner1 == null && owner2 != null ||
+                (
+                    owner1 != null && owner2 != null && (
+                        participant1==null && participant2!=null ||
+                        participant1!=null && participant2==null ||
+                        participant1!=null && participant2!=null && participant1.pid != participant2.pid
+                    )
+                )
+            ){
+                var desc = getOrCalc(owner2.m);
+                if(participant2==null){
+                    setStyle(el, desc, "#808080", 0.5, '#808080');
+                }else{
+                    setStyle(el, desc, participant2.color, 0.5, participant2.color);
+                }
+                $('.'+k.slice(0,k.length-1)+'text').toggle(true);
+            }else{
+                el.attr('d', '' );
+            }
+
+        };
+
+
+    }
+
+    var date = new Date()
+        date1 = new Date(date),
+        gOwnership = null,
+        gParticipants = null;
+
+    date1.setDate(date1.getDate() - 7);
+
+    $('#date').val(date.toISOString().split('T').join(' ').split('.')[0]);
+    $('#date1').val(date1.toISOString().split('T').join(' ').split('.')[0]);
+    $('#date2').val(date.toISOString().split('T').join(' ').split('.')[0]);
+
+    d3.json( '/wars/{{war.id}}/dashboard/systems', function (json) {
+        var trs = json.territories;
+        gOwnership = json.structures;
+        gParticipants = json.participants;
+        for(tid in trs){
+
+            var tr=trs[tid]
+
+            $('#timeline'+tid).highcharts({
+                chart: { type: 'line' },
+                title: null,
+                subtitle: null,
+                xAxis: { type: 'datetime', title: { text: 'Date'} },
+                yAxis: { title: { text: 'Sov Power' }, min: 0 },
+                tooltip: { enabled: false },
+                plotOptions: { line: { enableMouseTracking: false, animation: false, marker: { enabled: false } } },
+                series: tr.powers
+            });
+
+            var svg = d3.select("#t"+tid);
+
+            svg.selectAll("line").data(tr.links).enter()
+                    .append("line")
+                        .attr("x1", function(d) { return d.f.sx; })
+                        .attr("y1", function(d) { return d.f.sz; })
+                        .attr("x2", function(d) { return d.t.sx; })
+                        .attr("y2", function(d) { return d.t.sz; });
+
+            var circle = svg.selectAll("circle").data(tr.systems);
+            circle.enter().append("circle")
+                .attr("cx", function(d) { return d.sx; })
+                .attr("cy", function(d) { return d.sz; })
+                .attr("r", 2.0);
+
+            circle.enter().append("path")
+                .attr("transform", function(d) { return "translate("+d.sx+","+d.sz+") rotate(60, 0, 0)"; })
+                .attr("class", function(d) { return "s"+d.id+"h"; });
+
+            circle.enter().append("path")
+                .attr("transform", function(d) { return "translate("+d.sx+","+d.sz+") rotate(180, 0, 0)"; })
+                .attr("class", function(d) { return "s"+d.id+"t"; });
+
+            circle.enter().append("path")
+                .attr("transform", function(d) { return "translate("+d.sx+","+d.sz+") rotate(300, 0, 0)"; })
+                .attr("class", function(d) { return "s"+d.id+"s"; });
+
+            svg.selectAll("text").data(tr.systems).enter()
+                    .append("text")
+                        .attr("x", function(d) { return d.sx; })
+                        .attr("y", function(d) { return d.sz; })
+                        .attr("dx", 11)
+                        .attr("dy", 2)
+                        .text(function(d) { return d.name; });
+
+        }
+
+        showOwnership(json.structures, json.participants);
+    });
+</script>
 
 {% endblock %}

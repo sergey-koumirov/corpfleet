@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+
+{% include "cwo/war/_dashboard_script.html" with map=map %}
+
+<h4><a href="{% url 'cwo:war_index' %}">Wars</a> / {{ map.war.name }} / Powers & Maps</h4>
+
+<div class="row">
+    <div class="col-md-3">
+        <form-group>
+            <label for="date">On date</label>
+            <input id="date" type="text">
+            <button class="btn btn-default" onclick="showOwnership()"> &gt;&gt;&gt; </button>
+        </form-group>
+    </div>
+    <div class="col-md-6">
+        <form-group>
+            <label for="date">Date Diff</label>
+            <input id="date1" type="text">
+            <input id="date2" type="text">
+            <button class="btn btn-default" onclick="showDiffOwnership()"> &gt;&gt;&gt; </button>
+        </form-group>
+    </div>
+</div>
+
+
+<h3>Participants</h3>
+{% for participant in map.war.participant_set.all %}
+<ul class="participant">
+    <li style="color:{{participant.color}}"><b>{{participant.name}}</b></li>
+    <ul>
+        {% for alliance in participant.info.alliances %}
+        <li>
+            <span style="color:{{participant.color}}">{{alliance.alliance_name}}</span>
+            {% ifnotequal alliance.date2 '9999-12-31 23:59:59' %}
+            {{alliance.date2}}
+            {% endifnotequal %}
+        </li>
+        {% endfor %}
+    </ul>
+</ul>
+{% endfor %}
+
+<hr class="clear">
+
+<h2>Territories</h2>
+
+{% for tid, tinfo in map.war_systems.items %}
+<h3>{{tinfo.territory.name}} </h3>
+<div id="timeline{{tid}}" style="height: 400px; min-width: 800px"></div>
+<label for="showtext{{tid}}">Show system names</label><input id="showtext{{tid}}" type="checkbox" autocomplete="off" checked="checked" onclick="toogleSystemNames({{tid}})"/>
+<br>
+{% for region in tinfo.territory.regions %}
+<span class="btn-my">{{region.name}}</span>
+{% endfor %}
+<br>
+<svg id="t{{tid}}" viewBox="-50 -50 1100 1100" width="1350" height="1350" style="border: 1px solid #404040">
+{% for link in tinfo.links %}<line x1="{{link.from.sx|floatformat}}" y1="{{link.from.sz|floatformat}}" x2="{{link.to.sx|floatformat}}" y2="{{link.to.sz|floatformat}}" />
+{% endfor %}
+
+{% for sid, system in tinfo.systems.items %}<circle cx="{{system.sx|floatformat}}" cy="{{system.sz|floatformat}}" r="2" />
+<path class="s{{sid}}h" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(60, 0, 0)"/>
+<path class="s{{sid}}t" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(180, 0, 0)"/>
+<path class="s{{sid}}s" transform="translate({{system.sx|floatformat}},{{system.sz|floatformat}}) rotate(300, 0, 0)"/>
+{% endfor %}
+
+{% for sid, system in tinfo.systems.items %}<text class="s{{sid}}text" x="{{system.sx|floatformat}}" dx="11" y="{{system.sz|floatformat}}" dy="2">{{system.name}}</text>
+{% endfor %}
+</svg>
+
+{% endfor %}
+<svg>
+    <defs>
+        <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4">
+            <path d="M-1,1 l2,-2  M0,4 l4,-4  M3,5 l2,-2" style="stroke:#CCCCCC; stroke-width:1"/>
+        </pattern>
+
+        {% for participant in map.war.participant_set.all %}
+        <rect id="tileRect{{participant.id}}" x="0.5" y="0.5" width="3.0" height="3.0" fill="{{participant.color}}"/>
+        <pattern id                    = "tilePattern{{participant.id}}"
+                 x                     = "0"
+                 y                     = "0"
+                 width                 = "4"
+                 height                = "4"
+                 patternContentUnits   = "userSpaceOnUse"
+                 patternUnits          = "userSpaceOnUse">
+            <use xlink:href="#tileRect{{participant.id}}" />
+        </pattern>
+        {% endfor %}
+
+        <rect id="tileRectX" x="0.5" y="0.5" width="2.0" height="2.0" fill="#808080"/>
+        <pattern id                    = "tilePatternX"
+                 x                     = "0"
+                 y                     = "0"
+                 width                 = "4"
+                 height                = "4"
+                 patternContentUnits   = "userSpaceOnUse"
+                 patternUnits          = "userSpaceOnUse">
+            <use xlink:href="#tileRectX" />
+        </pattern>
+
+    </defs>
+</svg>
+
+<image src="{% static 'legend.png' %}"/>
+
+{% endblock %}

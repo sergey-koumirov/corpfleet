@@ -12,8 +12,7 @@
     <li>
         {{ war.name }} (
         <a href="{% url 'cwo:war_edit' war.id %}">Edit</a> |
-        <a href="{% url 'cwo:war_dashboard' war.id %}">Powers & Maps</a> |
-        <a href="{% url 'cwo:war_dashboard2' war.id %}">Powers & Maps - 2</a>
+        <a href="{% url 'cwo:war_dashboard' war.id %}">Powers & Maps</a>
         )
     </li>
     {% endfor %}
