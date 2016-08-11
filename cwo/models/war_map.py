@@ -40,6 +40,7 @@ class WarMap:
             result[t.id] = {
                 'id': t.id,
                 'name': t.name,
+                'regions': [ {'id': r.id, 'name': r.region.name} for r in t.territoryregion_set.all()],
             }
         return result
 
