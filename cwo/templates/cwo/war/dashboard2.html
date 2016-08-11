@@ -11,7 +11,7 @@
         <form-group>
             <label for="date">On date</label>
             <input id="date" type="text">
-            <button class="btn btn-default" onclick="showOwnership()"> &gt;&gt;&gt; </button>
+            <button class="btn btn-default" onclick="showOwnership(gOwnership, gParticipants)"> &gt;&gt;&gt; </button>
         </form-group>
     </div>
     <div class="col-md-6">
@@ -51,7 +51,7 @@
 <svg id="t{{tid}}" viewBox="-50 -50 1100 1100" width="1250" height="1250"></svg>
 <hr class="clear">
 {% endfor %}
-<svg style="display: none;">
+<svg>
     <defs>
         <pattern id="diagonalHatch" patternUnits="userSpaceOnUse" width="4" height="4"><path d="M-1,1 l2,-2  M0,4 l4,-4  M3,5 l2,-2" style="stroke:#CCCCCC; stroke-width:1"/></pattern>
 
@@ -184,8 +184,59 @@
         }
     }
 
+    var showDiffOwnership = function(){
+        var sDate1 = $('#date1').val(),
+            sDate2 = $('#date2').val();
+
+        for(k in gOwnership){
+            var values = gOwnership[k],
+                owner1 = getOwnerOnDate(values,sDate1),
+                owner2 = getOwnerOnDate(values,sDate2),
+                el = $("."+k),
+                participant1 = null,
+                participant2 = null;
+
+            if(owner1 != null ){ participant1 = getParticipant(gParticipants, owner1.aid, sDate1); }
+            if(owner2 != null ){ participant2 = getParticipant(gParticipants, owner2.aid, sDate2); }
+
+            if(owner1 != null && owner2 == null){
+                var desc = getOrCalc(owner1.m);
+                if(participant1==null){
+                    setStyle(el, desc, "url(#tilePatternX)", 0.5, '#808080', '2 2');
+                }else{
+                    setStyle(el, desc, "url(#tilePattern"+participant1.pid+")", 0.5, participant1.color, '2 2');
+                }
+                $('.'+k.slice(0,k.length-1)+'text').toggle(true);
+            }else if(
+                owner1 == null && owner2 != null ||
+                (
+                    owner1 != null && owner2 != null && (
+                        participant1==null && participant2!=null ||
+                        participant1!=null && participant2==null ||
+                        participant1!=null && participant2!=null && participant1.pid != participant2.pid
+                    )
+                )
+            ){
+                var desc = getOrCalc(owner2.m);
+                if(participant2==null){
+                    setStyle(el, desc, "#808080", 0.5, '#808080');
+                }else{
+                    setStyle(el, desc, participant2.color, 0.5, participant2.color);
+                }
+                $('.'+k.slice(0,k.length-1)+'text').toggle(true);
+            }else{
+                el.attr('d', '' );
+            }
+
+        };
+
+
+    }
+
     var date = new Date()
-        date1 = new Date(date);
+        date1 = new Date(date),
+        gOwnership = null,
+        gParticipants = null;
 
     date1.setDate(date1.getDate() - 7);
 
@@ -195,6 +246,8 @@
 
     d3.json( '/wars/{{war.id}}/dashboard/systems', function (json) {
         var trs = json.territories;
+        gOwnership = json.structures;
+        gParticipants = json.participants;
         for(tid in trs){
 
             var tr=trs[tid]

@@ -30,21 +30,21 @@
 
 
 <h3>Participants</h3>
-    {% for participant in map.war.participant_set.all %}
-    <ul class="participant">
-        <li style="color:{{participant.color}}"><b>{{participant.name}}</b></li>
-        <ul>
-            {% for alliance in participant.info.alliances %}
-            <li>
-                <span style="color:{{participant.color}}">{{alliance.alliance_name}}</span>
-                {% ifnotequal alliance.date2 '9999-12-31 23:59:59' %}
-                    {{alliance.date2}}
-                {% endifnotequal %}
-            </li>
-            {% endfor %}
-        </ul>
+{% for participant in map.war.participant_set.all %}
+<ul class="participant">
+    <li style="color:{{participant.color}}"><b>{{participant.name}}</b></li>
+    <ul>
+        {% for alliance in participant.info.alliances %}
+        <li>
+            <span style="color:{{participant.color}}">{{alliance.alliance_name}}</span>
+            {% ifnotequal alliance.date2 '9999-12-31 23:59:59' %}
+            {{alliance.date2}}
+            {% endifnotequal %}
+        </li>
+        {% endfor %}
     </ul>
-    {% endfor %}
+</ul>
+{% endfor %}
 
 <hr class="clear">
 
