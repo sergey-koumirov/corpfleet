@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load staticfiles %}
+
+{% block content %}
+
+<div id="container" style="width: 800px; height: 800px; border: 1px solid #000000"></div>
+
+<script src="{% static 'sigma/sigma.js' %}"></script>
+<script>
+    var s = new sigma('container');
+
+    s.graph.
+        addNode({id: 'n0', label: 'Hello', x: 0.1, y: 0.1, size: 1, color: '#f00'}).
+        addNode({id: 'n1', label: 'World !', x: 0.9, y: 0.9, size: 1, color: '#00f'}).
+        addEdge({id: 'e0', source: 'n0', target: 'n1'});
+    s.refresh();
+</script>
+
+{% endblock %}

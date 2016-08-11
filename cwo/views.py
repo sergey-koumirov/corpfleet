@@ -9,6 +9,7 @@ from .models import Region
 from .forms import WarForm
 import json
 import datetime
+import time
 
 
 def war_index(request):
@@ -228,7 +229,21 @@ def war_regions(request):
 def war_dashboard(request, war_id):
     try:
         war = War.objects.get(pk=war_id)
+        t = time.time()
         map = WarMap(war)
+        elapsed_time = time.time() - t
+        print('elapsed_time: ',elapsed_time)
         return render(request, 'cwo/war/dashboard.html', {'map': map})
+    except War.DoesNotExist:
+        raise Http404("War does not exist")
+
+def war_dashboard2(request, war_id):
+    try:
+        war = War.objects.get(pk=war_id)
+        t = time.time()
+        map = WarMap(war)
+        elapsed_time = time.time() - t
+        print('elapsed_time: ',elapsed_time)
+        return render(request, 'cwo/war/dashboard2.html', {'map': map})
     except War.DoesNotExist:
         raise Http404("War does not exist")
