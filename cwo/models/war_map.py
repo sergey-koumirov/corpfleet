@@ -11,6 +11,56 @@ class WarMap:
     def __init__(self, war):
         self.war = war
 
+    def as_json(self):
+        self._minmax = self.minmax()
+        self._systems = self.systems()
+        return {
+            'territories': self.territory_infos_as_json(),
+            'structures': self.ownership(),
+            'participants': self.participants(),
+        }
+
+    def territory_infos_as_json(self):
+        result = {}
+        for t in Territory.objects.filter(war_id=self.war.id):
+            result[t.id] = {
+                'id': t.id,
+                'name': t.name,
+                'regions': [ {'id': r.id, 'name': r.region.name} for r in t.territoryregion_set.all()],
+                'powers': self.powers_as_json(t.id),
+                'systems': self.war_systems_as_json(t.id),
+                'links': self.war_system_links(t.id)
+            }
+
+        return result
+
+    def territories_as_json(self):
+        result = {}
+        for t in Territory.objects.filter(war_id=self.war.id):
+            result[t.id] = {
+                'id': t.id,
+                'name': t.name,
+            }
+        return result
+
+    def war_systems_as_json(self, tid):
+        sql = (
+            'select s.id as sid '
+            '  from cwo_territoryregion tr, cwo_system s '
+            '  where s.region_id = tr.region_id'
+            '    and tr.territory_id = %s'
+        )
+        cursor = connection.cursor()
+        cursor.execute(sql, [tid])
+
+        result = []
+        for record in cursor.fetchall():
+            result.append(self.system_on_territory(record[0], tid))
+        return result
+
+    # ------------------------------------------------------------------------------------------------------------------
+
+
     def load(self):
         self._minmax = self.minmax()
         self.ownership = self.ownership()
@@ -63,6 +113,7 @@ class WarMap:
         minmax = self._minmax[territory_id]
         system = self._systems[system_id]
         return {
+            'id': system.id,
             'name': system.name,
             'sx': (system.x - minmax['minx']) / minmax['factor'],
             'sy': (system.y - minmax['miny']) / minmax['factor'],
@@ -123,10 +174,12 @@ class WarMap:
         cursor.execute(sql, [territory_id])
         result = []
         for record in cursor.fetchall():
-          result.append({
-              'from': self.system_on_territory(record[0], territory_id),
-              'to': self.system_on_territory(record[1], territory_id)
-          })
+            f = self.system_on_territory(record[0], territory_id)
+            t = self.system_on_territory(record[1], territory_id)
+            result.append({
+                'f': {'sx': f['sx'], 'sz': f['sz']},
+                't': {'sx': t['sx'], 'sz': t['sz']}
+            })
         return result
 
     def territories(self):
@@ -140,7 +193,7 @@ class WarMap:
             }
         return result
 
-    def powers(self, tid):
+    def powers_as_json(self, tid):
         sql = (
             'select d, sum(x.adm) as power'
             '  from( SELECT s1.id, s1.alliance_id, s1.defence as adm, GREATEST(s1.date1, pa1.date1) as d '
@@ -172,7 +225,7 @@ class WarMap:
             '  order by d '
         )
 
-        result = {}
+        result = []
         for p in self.war.participant_set.all():
             cursor = connection.cursor()
             cursor.execute(sql, {'tid': tid, 'pid': p.id})
@@ -180,21 +233,15 @@ class WarMap:
             data=[]
             for record in cursor.fetchall():
                 power = power + record[1]
-                data.append({
-                    'date': record[0].timestamp()*1000,
-                    'adm': power
-                })
+                data.append([record[0].timestamp()*1000, power])
             if len(data)>0:
-                data.append({
-                    'date': timezone.now().timestamp()*1000,
-                    'adm': power
-                })
+                data.append([timezone.now().timestamp()*1000,power])
 
-                result[p.id] = {
+                result.append({
                     'name': p.name,
                     'color': p.color,
                     'data': data,
-                }
+                })
 
         return result
 
@@ -230,8 +277,8 @@ class WarMap:
             result[record[0]].append({
                 'aid': record[1],
                 'm': record[2],
-                'd1': record[3],
-                'd2': record[4],
+                'd1': '{0:%Y-%m-%d %H:%M:%S}'.format(record[3]),
+                'd2': '{0:%Y-%m-%d %H:%M:%S}'.format(record[4]),
             })
 
         return result
@@ -254,8 +301,8 @@ class WarMap:
             result[record[0]].append({
                 'pid': record[1],
                 'name': record[2],
-                'd1': record[3],
-                'd2': record[4],
+                'd1': '{0:%Y-%m-%d %H:%M:%S}'.format(record[3]),
+                'd2': '{0:%Y-%m-%d %H:%M:%S}'.format(record[4]),
                 'color': record[5],
             })
         return result

@@ -10,7 +10,8 @@ from .forms import WarForm
 import json
 import datetime
 import time
-
+import decimal
+from .common import DecimalEncoder
 
 def war_index(request):
     wars = War.objects.order_by('-id').all()
@@ -241,18 +242,22 @@ def war_dashboard(request, war_id):
 def war_dashboard2(request, war_id):
     try:
         war = War.objects.get(pk=war_id)
-        t = time.time()
         map = WarMap(war)
-        elapsed_time = time.time() - t
-        print('elapsed_time: ',elapsed_time)
-        return render(request, 'cwo/war/dashboard2.html', {'map': map})
+        return render(request, 'cwo/war/dashboard2.html', {'war': war, 'territories': map.territories_as_json()})
     except War.DoesNotExist:
         raise Http404("War does not exist")
+
+def json_encode_decimal(obj):
+    if isinstance(obj, decimal.Decimal):
+        return float(obj)
+    raise TypeError(repr(obj) + " is not JSON serializable")
 
 def war_dashboard_systems(equest, war_id):
     try:
         war = War.objects.get(pk=war_id)
         map = WarMap(war)
-        return HttpResponse(json.dumps(map.systems_json()), content_type="application/json")
+        return HttpResponse(json.dumps(map.as_json(), default=json_encode_decimal), content_type="application/json")
     except War.DoesNotExist:
         raise Http404("War does not exist")
+
+
