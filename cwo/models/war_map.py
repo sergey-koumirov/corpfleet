@@ -2,6 +2,7 @@ from cwo.models import Territory
 from cwo.models import System
 from cwo.models import Structure
 from cwo.models import Region
+from cwo.models import Event
 from django.db import connection
 import datetime
 from django.utils import timezone
@@ -29,7 +30,8 @@ class WarMap:
                 'regions': [ {'id': r.id, 'name': r.region.name} for r in t.territoryregion_set.all()],
                 'powers': self.powers_as_json(t.id),
                 'systems': self.war_systems_as_json(t.id),
-                'links': self.war_system_links(t.id)
+                'links': self.war_system_links(t.id),
+                'events': self.events_as_json(t.id),
             }
 
         return result
@@ -58,6 +60,34 @@ class WarMap:
         for record in cursor.fetchall():
             result.append(self.system_on_territory(record[0], tid))
         return result
+
+    def events_as_json(self, tid):
+        sql = (
+            'select e.* '
+            '  from cwo_event e, cwo_territoryregion tr, cwo_system s '
+            '  where s.region_id = tr.region_id'
+            '    and e.system_id = s.id  '
+            '    and tr.territory_id = %s'
+            '  order by e.date desc'
+        )
+        result = []
+        for e in Event.objects.raw(sql, [tid]):
+            d = '{0:%Y-%m-%d %H:%M:%S}'.format(e.date)
+            result.append({
+                'system_id': e.system_id,
+                'alliance_id': e.alliance_id,
+                'date': d,
+                'message': '{} {} {} ({}) {}'.format(d[8:], e.system.name, WarMap.structure_type(e.type_id), e.alliance.name, e.event_type  )
+            })
+        return result
+
+    def structure_type(type_id):
+        if type_id == 32458:
+            return 'HUB'
+        elif type_id == 32226:
+            return 'TCU'
+        else:
+            return 'Station'
 
     # ------------------------------------------------------------------------------------------------------------------
 
