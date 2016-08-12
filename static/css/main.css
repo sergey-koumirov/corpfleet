@@ -73,11 +73,18 @@ svg line{
   stroke-width: 1;
 }
 
-svg circle{
+svg circle.sys{
   stroke: #808080;
   stroke-width: 1;
   fill: #CCCCCC;
 }
+
+svg circle.ev{
+  stroke-width: 1;
+  fill: none;
+  stroke-dasharray: 2 2;
+}
+
 
 ul.participant{
   float: left;
@@ -85,4 +92,14 @@ ul.participant{
 
 .clear{
   clear: both;
+}
+
+.event-list{
+    width: 250px;
+    float: right;
+    font-size: 9px;
+}
+
+.event-list p{
+    margin: 2px;
 }

@@ -4,7 +4,7 @@ from cwo.models import Structure
 from cwo.models import Region
 from cwo.models import Event
 from django.db import connection
-import datetime
+from datetime import datetime, timedelta
 from django.utils import timezone
 
 class WarMap:
@@ -56,9 +56,9 @@ class WarMap:
         cursor = connection.cursor()
         cursor.execute(sql, [tid])
 
-        result = []
+        result = {}
         for record in cursor.fetchall():
-            result.append(self.system_on_territory(record[0], tid))
+            result[record[0]]=self.system_on_territory(record[0], tid)
         return result
 
     def events_as_json(self, tid):
@@ -67,11 +67,14 @@ class WarMap:
             '  from cwo_event e, cwo_territoryregion tr, cwo_system s '
             '  where s.region_id = tr.region_id'
             '    and e.system_id = s.id  '
-            '    and tr.territory_id = %s'
-            '  order by e.date desc'
+            '    and tr.territory_id = %s '
+            '    and e.date > %s '
+            '  order by e.date desc '
+            '  limit 50 '
         )
         result = []
-        for e in Event.objects.raw(sql, [tid]):
+        week_ago = datetime.now() - timedelta(days=7)
+        for e in Event.objects.raw(sql, [tid, '{0:%Y-%m-%d %H:%M:%S}'.format(week_ago)]):
             d = '{0:%Y-%m-%d %H:%M:%S}'.format(e.date)
             result.append({
                 'system_id': e.system_id,

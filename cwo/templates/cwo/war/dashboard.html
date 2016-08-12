@@ -52,7 +52,10 @@
 {% endfor %}
 <br>
 <div id="timeline{{tid}}" style="height: 400px; width: 95%"></div>
-<svg id="t{{tid}}" viewBox="-50 -50 1300 1100" width="1350" height="1150"></svg>
+<svg id="t{{tid}}" viewBox="-50 -50 1100 1100" width="1100" height="1100"></svg>
+<div id="event-list-{{tid}}" class="event-list">
+
+</div>
 <hr class="clear">
 {% endfor %}
 <svg>
@@ -267,7 +270,26 @@
                 series: tr.powers
             });
 
+            d3.select("#event-list-"+tid).selectAll("line").data(tr.events).enter()
+                    .append("p")
+                        .attr('style', function(d){
+                            var p = getParticipant(gParticipants, d.alliance_id, d.date);
+                            if(p){ return 'color: '+p.color; }else{ return 'color: #cccccc' }
+                        })
+                        .text(function(d) { return d.message; });
+
             var svg = d3.select("#t"+tid);
+
+            var events = svg.selectAll("circle.ev").data(tr.events);
+            events.enter().append("circle")
+                .attr("cx", function(d) { return tr.systems[d.system_id].sx; })
+                .attr("cy", function(d) { return tr.systems[d.system_id].sz; })
+                .attr("class","ev")
+                .attr("r", 12.0)
+                .attr("stroke", function(d){
+                            var p = getParticipant(gParticipants, d.alliance_id, d.date);
+                            if(p){ return p.color; }else{ return '#cccccc' }
+                        });
 
             svg.selectAll("line").data(tr.links).enter()
                     .append("line")
@@ -276,11 +298,12 @@
                         .attr("x2", function(d) { return d.t.sx; })
                         .attr("y2", function(d) { return d.t.sz; });
 
-            var circle = svg.selectAll("circle").data(tr.systems);
+            var circle = svg.selectAll("circle.sys").data(d3.values(tr.systems));
             circle.enter().append("circle")
                 .attr("cx", function(d) { return d.sx; })
                 .attr("cy", function(d) { return d.sz; })
-                .attr("r", 2.0);
+                .attr("r", 2.0)
+                .attr("class","sys");
 
             circle.enter().append("path")
                 .attr("transform", function(d) { return "translate("+d.sx+","+d.sz+") rotate(60, 0, 0)"; })
@@ -294,7 +317,7 @@
                 .attr("transform", function(d) { return "translate("+d.sx+","+d.sz+") rotate(300, 0, 0)"; })
                 .attr("class", function(d) { return "s"+d.id+"s"; });
 
-            svg.selectAll("text").data(tr.systems).enter()
+            svg.selectAll("text").data(d3.values(tr.systems)).enter()
                     .append("text")
                         .attr("x", function(d) { return d.sx; })
                         .attr("y", function(d) { return d.sz; })
