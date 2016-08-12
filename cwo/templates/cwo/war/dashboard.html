@@ -285,7 +285,7 @@
                 .attr("cx", function(d) { return tr.systems[d.system_id].sx; })
                 .attr("cy", function(d) { return tr.systems[d.system_id].sz; })
                 .attr("class","ev")
-                .attr("r", 12.0)
+                .attr("r", 15.0)
                 .attr("stroke", function(d){
                             var p = getParticipant(gParticipants, d.alliance_id, d.date);
                             if(p){ return p.color; }else{ return '#cccccc' }
@@ -321,7 +321,7 @@
                     .append("text")
                         .attr("x", function(d) { return d.sx; })
                         .attr("y", function(d) { return d.sz; })
-                        .attr("dx", 11)
+                        .attr("dx", 13)
                         .attr("dy", 2)
                         .text(function(d) { return d.name; });
 
