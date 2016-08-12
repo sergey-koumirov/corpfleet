@@ -94,3 +94,12 @@ class TerritoryRegion(models.Model):
             'region_name': self.region.name
         }
 
+class Event(models.Model):
+    id = models.AutoField(primary_key=True)
+    system = models.ForeignKey(System, on_delete=models.CASCADE)
+    alliance = models.ForeignKey(Alliance, on_delete=models.CASCADE)
+    type_id = models.BigIntegerField()
+    date = models.DateTimeField()
+    event_type = models.CharField(max_length=20)
+    defence1 = models.DecimalField(max_digits=3, decimal_places=1)
+    defence2 = models.DecimalField(max_digits=3, decimal_places=1)
