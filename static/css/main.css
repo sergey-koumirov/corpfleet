@@ -64,7 +64,7 @@ svg {
 
 svg text{
   fill: #404040;
-  fill-opacity: 1;
+  fill-opacity: 0.75;
   font-size: 8;
 }
 

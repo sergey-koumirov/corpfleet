@@ -95,6 +95,7 @@
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://code.highcharts.com/stock/highstock.js"></script>
 <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<script src="http://ariutta.github.io/svg-pan-zoom/dist/svg-pan-zoom.min.js"></script>
 
 <script>
     var setStyle = function(el, desc, fill, opacity, stroke, dasharray){
@@ -286,6 +287,7 @@
                 .attr("cy", function(d) { return tr.systems[d.system_id].sz; })
                 .attr("class","ev")
                 .attr("r", 15.0)
+                .attr("stroke-opacity", .25)
                 .attr("stroke", function(d){
                             var p = getParticipant(gParticipants, d.alliance_id, d.date);
                             if(p){ return p.color; }else{ return '#cccccc' }
@@ -324,10 +326,14 @@
                         .attr("dx", 13)
                         .attr("dy", 2)
                         .text(function(d) { return d.name; });
-
         }
 
         showOwnership(json.structures, json.participants);
+
+        for(tid in trs){
+            var panZoomTiger = svgPanZoom('#t'+tid);
+        }
+
     });
 </script>
 
