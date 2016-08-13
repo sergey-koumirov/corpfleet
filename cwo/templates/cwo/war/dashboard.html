@@ -164,7 +164,7 @@
     var getOwnerOnDate = function(owners, date){
         for(index in owners){
             var own = owners[index]
-            if(own.d1 < date && date <= own.d2){
+            if(own[2] < date && date <= own[3]){
                return own;
             }
         }
@@ -181,8 +181,8 @@
             if(owner == null){
                 el.attr('d', '' );
             }else{
-                var participant = getParticipant(participants, owner.aid, sDate),
-                    desc = getOrCalc(owner.m);
+                var participant = getParticipant(participants, owner[0], sDate),
+                    desc = getOrCalc(owner[1]);
                 if(participant){
                     setStyle(el, desc, participant.color, 0.5, participant.color)
                 }else{
@@ -204,11 +204,11 @@
                 participant1 = null,
                 participant2 = null;
 
-            if(owner1 != null ){ participant1 = getParticipant(gParticipants, owner1.aid, sDate1); }
-            if(owner2 != null ){ participant2 = getParticipant(gParticipants, owner2.aid, sDate2); }
+            if(owner1 != null ){ participant1 = getParticipant(gParticipants, owner1[0], sDate1); }
+            if(owner2 != null ){ participant2 = getParticipant(gParticipants, owner2[0], sDate2); }
 
             if(owner1 != null && owner2 == null){
-                var desc = getOrCalc(owner1.m);
+                var desc = getOrCalc(owner1[1]);
                 if(participant1==null){
                     setStyle(el, desc, "url(#tilePatternX)", 0.5, '#808080', '2 2');
                 }else{
@@ -225,7 +225,7 @@
                     )
                 )
             ){
-                var desc = getOrCalc(owner2.m);
+                var desc = getOrCalc(owner2[1]);
                 if(participant2==null){
                     setStyle(el, desc, "#808080", 0.5, '#808080');
                 }else{
@@ -274,58 +274,58 @@
             d3.select("#event-list-"+tid).selectAll("line").data(tr.events).enter()
                     .append("p")
                         .attr('style', function(d){
-                            var p = getParticipant(gParticipants, d.alliance_id, d.date);
+                            var p = getParticipant(gParticipants, d[1], d[2]);
                             if(p){ return 'color: '+p.color; }else{ return 'color: #cccccc' }
                         })
-                        .text(function(d) { return d.message; });
+                        .text(function(d) { return d[3]; });
 
             var svg = d3.select("#t"+tid);
 
             var events = svg.selectAll("circle.ev").data(tr.events);
             events.enter().append("circle")
-                .attr("cx", function(d) { return tr.systems[d.system_id].sx; })
-                .attr("cy", function(d) { return tr.systems[d.system_id].sz; })
+                .attr("cx", function(d) { return tr.systems[d[0]][2]; })
+                .attr("cy", function(d) { return tr.systems[d[0]][4]; })
                 .attr("class","ev")
                 .attr("r", 15.0)
                 .attr("stroke-opacity", .25)
                 .attr("stroke", function(d){
-                            var p = getParticipant(gParticipants, d.alliance_id, d.date);
+                            var p = getParticipant(gParticipants, d[1], d[2]);
                             if(p){ return p.color; }else{ return '#cccccc' }
                         });
 
             svg.selectAll("line").data(tr.links).enter()
                     .append("line")
-                        .attr("x1", function(d) { return d.f.sx; })
-                        .attr("y1", function(d) { return d.f.sz; })
-                        .attr("x2", function(d) { return d.t.sx; })
-                        .attr("y2", function(d) { return d.t.sz; });
+                        .attr("x1", function(d) { return d[0]; })
+                        .attr("y1", function(d) { return d[1]; })
+                        .attr("x2", function(d) { return d[2]; })
+                        .attr("y2", function(d) { return d[3]; });
 
             var circle = svg.selectAll("circle.sys").data(d3.values(tr.systems));
             circle.enter().append("circle")
-                .attr("cx", function(d) { return d.sx; })
-                .attr("cy", function(d) { return d.sz; })
+                .attr("cx", function(d) { return d[2]; })
+                .attr("cy", function(d) { return d[4]; })
                 .attr("r", 2.0)
                 .attr("class","sys");
 
             circle.enter().append("path")
-                .attr("transform", function(d) { return "translate("+d.sx+","+d.sz+") rotate(60, 0, 0)"; })
-                .attr("class", function(d) { return "s"+d.id+"h"; });
+                .attr("transform", function(d) { return "translate("+d[2]+","+d[4]+") rotate(60, 0, 0)"; })
+                .attr("class", function(d) { return "s"+d[0]+"h"; });
 
             circle.enter().append("path")
-                .attr("transform", function(d) { return "translate("+d.sx+","+d.sz+") rotate(180, 0, 0)"; })
-                .attr("class", function(d) { return "s"+d.id+"t"; });
+                .attr("transform", function(d) { return "translate("+d[2]+","+d[4]+") rotate(180, 0, 0)"; })
+                .attr("class", function(d) { return "s"+d[0]+"t"; });
 
             circle.enter().append("path")
-                .attr("transform", function(d) { return "translate("+d.sx+","+d.sz+") rotate(300, 0, 0)"; })
-                .attr("class", function(d) { return "s"+d.id+"s"; });
+                .attr("transform", function(d) { return "translate("+d[2]+","+d[4]+") rotate(300, 0, 0)"; })
+                .attr("class", function(d) { return "s"+d[0]+"s"; });
 
             svg.selectAll("text").data(d3.values(tr.systems)).enter()
                     .append("text")
-                        .attr("x", function(d) { return d.sx; })
-                        .attr("y", function(d) { return d.sz; })
+                        .attr("x", function(d) { return d[2]; })
+                        .attr("y", function(d) { return d[4]; })
                         .attr("dx", 13)
                         .attr("dy", 2)
-                        .text(function(d) { return d.name; });
+                        .text(function(d) { return d[1]; });
         }
 
         showOwnership(json.structures, json.participants);

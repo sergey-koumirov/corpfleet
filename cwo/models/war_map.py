@@ -1,11 +1,11 @@
 from cwo.models import Territory
 from cwo.models import System
-from cwo.models import Structure
 from cwo.models import Region
 from cwo.models import Event
 from django.db import connection
 from datetime import datetime, timedelta
 from django.utils import timezone
+from decimal import *
 
 class WarMap:
 
@@ -76,12 +76,12 @@ class WarMap:
         week_ago = datetime.now() - timedelta(days=7)
         for e in Event.objects.raw(sql, [tid, '{0:%Y-%m-%d %H:%M:%S}'.format(week_ago)]):
             d = '{0:%Y-%m-%d %H:%M:%S}'.format(e.date)
-            result.append({
-                'system_id': e.system_id,
-                'alliance_id': e.alliance_id,
-                'date': d,
-                'message': '{} {} {} ({}) {}'.format(d[8:], e.system.name, WarMap.structure_type(e.type_id), e.alliance.name, e.event_type  )
-            })
+            result.append([
+                e.system_id,
+                e.alliance_id,
+                d,
+                '{} {} {} ({}) {}'.format(d[8:], e.system.name, WarMap.structure_type(e.type_id), e.alliance.name, e.event_type)
+            ])
         return result
 
     def structure_type(type_id):
@@ -146,13 +146,13 @@ class WarMap:
     def system_on_territory(self, system_id, territory_id):
         minmax = self._minmax[territory_id]
         system = self._systems[system_id]
-        return {
-            'id': system.id,
-            'name': system.name,
-            'sx': (system.x - minmax['minx']) / minmax['factor'],
-            'sy': (system.y - minmax['miny']) / minmax['factor'],
-            'sz': 1000-(system.z - minmax['minz']) / minmax['factor']
-        }
+        return [
+            system.id,
+            system.name,
+            Decimal( (system.x - minmax['minx']) / minmax['factor'] ).quantize(Decimal('.01')),
+            Decimal( (system.y - minmax['miny']) / minmax['factor'] ).quantize(Decimal('.01')),
+            Decimal( 1000-(system.z - minmax['minz']) / minmax['factor'] ).quantize(Decimal('.01'))
+        ]
 
     def minmax(self):
         sql = (
@@ -210,10 +210,7 @@ class WarMap:
         for record in cursor.fetchall():
             f = self.system_on_territory(record[0], territory_id)
             t = self.system_on_territory(record[1], territory_id)
-            result.append({
-                'f': {'sx': f['sx'], 'sz': f['sz']},
-                't': {'sx': t['sx'], 'sz': t['sz']}
-            })
+            result.append( [ f[2], f[4], t[2], t[4] ] )
         return result
 
     def territories(self):
@@ -267,9 +264,9 @@ class WarMap:
             data=[]
             for record in cursor.fetchall():
                 power = power + record[1]
-                data.append([record[0].timestamp()*1000, power])
+                data.append([int(record[0].timestamp()*1000), power])
             if len(data)>0:
-                data.append([timezone.now().timestamp()*1000,power])
+                data.append([int(timezone.now().timestamp()*1000),power])
 
                 result.append({
                     'name': p.name,
@@ -308,12 +305,12 @@ class WarMap:
         for record in cursor.fetchall():
             if record[0] not in result:
                 result[record[0]] = []
-            result[record[0]].append({
-                'aid': record[1],
-                'm': record[2],
-                'd1': '{0:%Y-%m-%d %H:%M:%S}'.format(record[3]),
-                'd2': '{0:%Y-%m-%d %H:%M:%S}'.format(record[4]),
-            })
+            result[record[0]].append([
+                record[1], #aid
+                record[2], #def
+                '{0:%Y-%m-%d %H:%M:%S}'.format(record[3]),
+                '{0:%Y-%m-%d %H:%M:%S}'.format(record[4]),
+            ])
 
         return result
 
