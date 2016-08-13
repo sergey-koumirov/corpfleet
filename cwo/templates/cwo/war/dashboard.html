@@ -95,7 +95,6 @@
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://code.highcharts.com/stock/highstock.js"></script>
 <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
-<script src="http://ariutta.github.io/svg-pan-zoom/dist/svg-pan-zoom.min.js"></script>
 
 <script>
     var setStyle = function(el, desc, fill, opacity, stroke, dasharray){
@@ -279,7 +278,12 @@
                         })
                         .text(function(d) { return d[3]; });
 
-            var svg = d3.select("#t"+tid);
+            var svg = d3.select("#t"+tid)
+                        .call(
+                            d3.zoom()
+                              .scaleExtent([1, 5])
+                              .on("zoom", function(p1,p2,el) { d3.select('#'+el[0].id).attr("transform", d3.event.transform); })
+                        );
 
             var events = svg.selectAll("circle.ev").data(tr.events);
             events.enter().append("circle")
@@ -329,10 +333,6 @@
         }
 
         showOwnership(json.structures, json.participants);
-
-        for(tid in trs){
-            var panZoomTiger = svgPanZoom('#t'+tid);
-        }
 
     });
 </script>
