@@ -51,11 +51,14 @@
 <span class="btn-my">{{region.name}}</span>
 {% endfor %}
 <br>
-<div id="timeline{{tid}}" style="height: 400px; width: 95%"></div>
-<svg viewBox="-50 -50 1100 1100" width="1100" height="1100">
-    <g id="t{{tid}}"></g>
-</svg>
-<div id="event-list-{{tid}}" class="event-list">
+<div id="timeline{{tid}}" style="height: 400px; width: 1100px"></div>
+
+<div class="overlap">
+    <svg viewBox="-50 -50 1100 1100" width="1100" height="1100">
+        <g id="t{{tid}}"></g>
+    </svg>
+    <div id="event-list-{{tid}}" class="event-list">
+</div>
 
 </div>
 <hr class="clear">

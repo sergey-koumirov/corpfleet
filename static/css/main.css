@@ -98,8 +98,15 @@ ul.participant{
     width: 250px;
     float: right;
     font-size: 9px;
+    position: absolute;
+    left: 1110;
+    top: 10px;
 }
 
 .event-list p{
     margin: 2px;
+}
+
+.overlap{
+    position: relative;
 }
