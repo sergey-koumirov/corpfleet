@@ -65,17 +65,14 @@ svg {
 svg text{
   fill: #404040;
   fill-opacity: 0.75;
-  font-size: 8;
 }
 
 svg line{
   stroke: #CCCCCC;
-  stroke-width: 1;
 }
 
 svg circle.sys{
   stroke: #808080;
-  stroke-width: 1;
   fill: #CCCCCC;
 }
 

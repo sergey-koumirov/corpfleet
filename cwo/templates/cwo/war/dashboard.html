@@ -102,23 +102,28 @@
 <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
 
 <script>
-    var setStyle = function(el, desc, fill, opacity, stroke, dasharray){
+    var setStyle = function(el, adm, desc, fill, opacity, stroke, dasharray){
         el.attr('d', desc );
         el.attr('fill', fill);
         el.attr('fill-opacity', opacity);
         el.attr('stroke', stroke);
         el.attr('stroke-opacity', opacity + (1.0 - opacity)/3.0 );
+        el.attr('stroke-opacity', opacity + (1.0 - opacity)/3.0 );
+        el.attr('adm', adm)
         if(dasharray){
             el.attr('stroke-dasharray', dasharray);
         }
     }
 
     var pointsHash = {}
-    var getOrCalc = function(adm){
-        if( !pointsHash[adm] ){
+    var getOrCalc = function(adm, k=1){
+        admK = Math.round(adm*1000/k)/1000;
+        if(adm == 0){ admK = - Math.round(k*1000)/1000; }
+
+        if( !pointsHash[admK] ){
             var desc = "";
             if(adm==0){
-                var r1 = 4.0, r2 = 9,
+                var r1 = 4.0/k, r2 = 9.0/k,
                     a0 = Math.PI/6*1.5,
                     points = [];
 
@@ -128,8 +133,8 @@
                 }
 
             }else{
-                var r1 = 4.0,
-                    r2 = 4.0 + 2.0 + adm * 1.5;
+                var r1 = 4.0 / k,
+                    r2 = (4.0 + 2.0 + adm * 1.5)/k;
                 points=[
                     {x: 0, y: r1},
                     {x: r1 * Math.cos( Math.PI/6 ), y: r1 * Math.sin( Math.PI/6 )},
@@ -188,9 +193,9 @@
                 var participant = getParticipant(participants, owner[0], sDate),
                     desc = getOrCalc(owner[1]);
                 if(participant){
-                    setStyle(el, desc, participant.color, 0.5, participant.color)
+                    setStyle(el, owner[1], desc, participant.color, 0.5, participant.color)
                 }else{
-                    setStyle(el, desc, "url(#diagonalHatch)", 0.5, '#808080')
+                    setStyle(el, owner[1], desc, "url(#diagonalHatch)", 0.5, '#808080')
                 }
             }
         }
@@ -214,9 +219,9 @@
             if(owner1 != null && owner2 == null){
                 var desc = getOrCalc(owner1[1]);
                 if(participant1==null){
-                    setStyle(el, desc, "url(#tilePatternX)", 0.5, '#808080', '2 2');
+                    setStyle(el, owner1[1], desc, "url(#tilePatternX)", 0.5, '#808080', '2 2');
                 }else{
-                    setStyle(el, desc, "url(#tilePattern"+participant1.pid+")", 0.5, participant1.color, '2 2');
+                    setStyle(el, owner1[1], desc, "url(#tilePattern"+participant1.pid+")", 0.5, participant1.color, '2 2');
                 }
                 $('.'+k.slice(0,k.length-1)+'text').toggle(true);
             }else if(
@@ -231,9 +236,9 @@
             ){
                 var desc = getOrCalc(owner2[1]);
                 if(participant2==null){
-                    setStyle(el, desc, "#808080", 0.5, '#808080');
+                    setStyle(el, owner2[1], desc, "#808080", 0.5, '#808080');
                 }else{
-                    setStyle(el, desc, participant2.color, 0.5, participant2.color);
+                    setStyle(el, owner2[1], desc, participant2.color, 0.5, participant2.color);
                 }
                 $('.'+k.slice(0,k.length-1)+'text').toggle(true);
             }else{
@@ -270,8 +275,9 @@
                 subtitle: null,
                 xAxis: { type: 'datetime', title: { text: 'Date'} },
                 yAxis: { title: { text: 'Sov Power' }, min: 0 },
-                tooltip: { enabled: false },
-                plotOptions: { line: { enableMouseTracking: false, animation: false, marker: { enabled: false } } },
+                tooltip: { enabled: true },
+                plotOptions: { line: { enableMouseTracking: true, animation: false, marker: { enabled: true } } },
+                exporting: { enabled: false },
                 series: tr.powers
             });
 
@@ -287,8 +293,38 @@
                         .call(
                             d3.zoom()
                               .scaleExtent([1, 5])
-                              .on("zoom", function(p1,p2,el) { d3.select('#'+el[0].id).attr("transform", d3.event.transform); })
+                              .on("zoom", function(p1,p2,el) {
+                                  var root=d3.select('#'+el[0].id),
+                                      k = d3.event.transform.k;
+                                  root.attr("transform", d3.event.transform);
+                                  root.selectAll('text')
+                                      .attr('font-size', 10/k )
+                                      .attr('dx', 13/k )
+                                      .attr('dy', 2/k );
+
+                                  root.selectAll("circle.sys").attr('r', 2.0/k );
+
+                                  root.selectAll("circle.ev").attr('r', 15.0/k );
+
+                                  root.selectAll("line").attr('stroke-width', 1.0 / k);
+
+                                  root.selectAll("path")
+                                      .attr('stroke-width', 1.0 / k)
+                                      .attr('d', function(){
+                                          var adm = d3.select(this).attr('adm'),
+                                              d = '';
+                                          if( adm ){
+                                              d = getOrCalc(adm, k);
+                                          }
+                                          return d;
+                                      });
+                              })
                         );
+            svg.append("rect")
+                .attr("width", "100%")
+                .attr("height", "100%")
+                .attr("class", "overlay")
+                .attr("fill","#ffffff");
 
             var events = svg.selectAll("circle.ev").data(tr.events);
             events.enter().append("circle")
@@ -334,6 +370,7 @@
                         .attr("y", function(d) { return d[4]; })
                         .attr("dx", 13)
                         .attr("dy", 2)
+                        .attr("font-size", 10)
                         .text(function(d) { return d[1]; });
         }
 
