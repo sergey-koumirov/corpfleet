@@ -9,10 +9,11 @@ from .models import Region
 from .forms import WarForm
 import json
 import datetime
-import time
 import decimal
-from .common import DecimalEncoder
+from django.contrib.auth.decorators import login_required
 
+
+@login_required
 def war_index(request):
     wars = War.objects.order_by('-id').all()
     context = {
@@ -21,6 +22,7 @@ def war_index(request):
     return render(request, 'cwo/war/index.html', context)
 
 
+@login_required
 def war_new(request):
     war = War()
     war.name = '[ {0:%Y-%m-%d %H:%M:%S} ] Red vs Blue'.format(datetime.datetime.now())
@@ -33,6 +35,7 @@ def war_new(request):
     return render(request, 'cwo/war/new.html', context)
 
 
+@login_required
 def war_create(request):
     war = WarForm(request.POST)
     if war.is_valid():
@@ -42,6 +45,7 @@ def war_create(request):
         return render(request, 'cwo/war/new.html', {'war': war})
 
 
+@login_required
 def war_edit(request, war_id):
     try:
         war = War.objects.get(pk=war_id)
@@ -50,6 +54,7 @@ def war_edit(request, war_id):
     return render(request, 'cwo/war/edit.html', {'war': WarForm(instance=war)})
 
 
+@login_required
 def war_update(request, war_id):
     try:
         instance = War.objects.get(pk=war_id)
@@ -64,6 +69,7 @@ def war_update(request, war_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def war_delete(request, war_id):
     try:
         instance = War.objects.get(pk=war_id)
@@ -73,6 +79,7 @@ def war_delete(request, war_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def add_participant(request, war_id):
     try:
         json_data = json.loads(request.body.decode("utf-8"))
@@ -83,6 +90,7 @@ def add_participant(request, war_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def delete_participant(request, war_id, participant_id):
     try:
         war = War.objects.get(pk=war_id)
@@ -93,6 +101,7 @@ def delete_participant(request, war_id, participant_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def update_participant(request, war_id, participant_id):
     try:
         war = War.objects.get(pk=war_id)
@@ -105,6 +114,7 @@ def update_participant(request, war_id, participant_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def add_alliance(request, war_id, participant_id):
     try:
         json_data = json.loads(request.body.decode("utf-8"))
@@ -122,6 +132,7 @@ def add_alliance(request, war_id, participant_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def delete_alliance(request, war_id, participant_id, pa_id):
     try:
         war = War.objects.get(pk=war_id)
@@ -133,6 +144,7 @@ def delete_alliance(request, war_id, participant_id, pa_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def update_alliance(request, war_id, participant_id, pa_id):
     try:
         war = War.objects.get(pk=war_id)
@@ -149,6 +161,7 @@ def update_alliance(request, war_id, participant_id, pa_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def add_territory(request, war_id):
     try:
         json_data = json.loads(request.body.decode("utf-8"))
@@ -159,6 +172,7 @@ def add_territory(request, war_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def delete_territory(request, war_id, territory_id):
     try:
         war = War.objects.get(pk=war_id)
@@ -169,6 +183,7 @@ def delete_territory(request, war_id, territory_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def update_territory(request, war_id, territory_id):
     try:
         war = War.objects.get(pk=war_id)
@@ -181,6 +196,7 @@ def update_territory(request, war_id, territory_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def add_region(request, war_id, territory_id):
     try:
         json_data = json.loads(request.body.decode("utf-8"))
@@ -193,6 +209,7 @@ def add_region(request, war_id, territory_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def delete_region(request, war_id, territory_id, tr_id):
     try:
         war = War.objects.get(pk=war_id)
@@ -204,6 +221,7 @@ def delete_region(request, war_id, territory_id, tr_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def info(request, war_id):
     try:
         war = War.objects.get(pk=war_id)
@@ -212,6 +230,7 @@ def info(request, war_id):
         raise Http404("War does not exist")
 
 
+@login_required
 def war_alliances(request):
     q = request.GET.get('term', '')
     alliances = []
@@ -220,12 +239,14 @@ def war_alliances(request):
     return HttpResponse(json.dumps(alliances), content_type="application/json")
 
 
+@login_required
 def war_regions(request):
     q = request.GET.get('term', '')
     regions = []
     for r in Region.objects.filter(name__icontains=q).order_by('name')[:10]:
         regions.append({'id': r.id, 'name': r.name})
     return HttpResponse(json.dumps(regions), content_type="application/json")
+
 
 def war_dashboard(request, war_id):
     try:
@@ -235,10 +256,12 @@ def war_dashboard(request, war_id):
     except War.DoesNotExist:
         raise Http404("War does not exist")
 
+
 def json_encode_decimal(obj):
     if isinstance(obj, decimal.Decimal):
         return float(obj)
     raise TypeError(repr(obj) + " is not JSON serializable")
+
 
 def war_dashboard_systems(equest, war_id):
     try:
