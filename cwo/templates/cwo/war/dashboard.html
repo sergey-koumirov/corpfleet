@@ -203,18 +203,35 @@
 
         for(tid in gTerritories){
             var tr = gTerritories[tid],
-                cnt = 0,
-                eventsArray = tr.events.filter(function(d){ cnt = cnt+1; return cnt<79 && d[2]<=sDate; });
+                cnt = 0;
 
-            console.debug(eventsArray);
+            var eventsArray = tr.events.filter(function(d){
+                var show = cnt<49 && d[2]<=sDate;
+                if(show){
+                    cnt = cnt+1;
+                    return true;
+                }else{
+                    return false;
+                }
 
-            d3.select("#event-list-"+tid).selectAll("p").data(eventsArray).enter()
-                .append("p")
+            });
+
+            var eventNodes = d3.select("#event-list-"+tid).selectAll("p").data(eventsArray);
+
+            eventNodes.enter().append("p")
                     .attr('style', function(d){
                         var p = getParticipant(gParticipants, d[1], d[2]);
                         if(p){ return 'color: '+p.color; }else{ return 'color: #cccccc' }
                     })
                     .text(function(d) { return d[3]; });
+
+            eventNodes.attr('style', function(d){
+                        var p = getParticipant(gParticipants, d[1], d[2]);
+                        if(p){ return 'color: '+p.color; }else{ return 'color: #cccccc' }
+                    })
+                    .text(function(d) { return d[3]; });
+
+            eventNodes.exit().remove();
         }
     }
 
