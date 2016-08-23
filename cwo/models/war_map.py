@@ -11,6 +11,11 @@ class WarMap:
 
     def __init__(self, war):
         self.war = war
+        self.last_date =min(datetime.now(), war.date2)
+        self.last_date_str = '{0:%Y-%m-%d %H:%M:%S}'.format( self.last_date )
+
+        self.last_date7 = self.last_date - timedelta(days=7)
+        self.last_date7_str = '{0:%Y-%m-%d %H:%M:%S}'.format( self.last_date7 )
 
     def as_json(self):
         self._minmax = self.minmax()
@@ -68,13 +73,12 @@ class WarMap:
             '  where s.region_id = tr.region_id'
             '    and e.system_id = s.id  '
             '    and tr.territory_id = %s '
-            '    and e.date > %s '
+            '    and %s <= e.date '
+            '    and e.date <= %s '
             '  order by e.date desc '
-            '  limit 50 '
         )
         result = []
-        week_ago = datetime.now() - timedelta(days=7)
-        for e in Event.objects.raw(sql, [tid, '{0:%Y-%m-%d %H:%M:%S}'.format(week_ago)]):
+        for e in Event.objects.raw(sql, [tid, self.war.date1, self.war.date2]):
             d = '{0:%Y-%m-%d %H:%M:%S}'.format(e.date)
             result.append([
                 e.system_id,

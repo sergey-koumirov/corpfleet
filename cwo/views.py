@@ -252,7 +252,7 @@ def war_dashboard(request, war_id):
     try:
         war = War.objects.get(pk=war_id)
         map = WarMap(war)
-        return render(request, 'cwo/war/dashboard.html', {'war': war, 'territories': map.territories_as_json()})
+        return render(request, 'cwo/war/dashboard.html', {'warmap': map, 'war': war, 'territories': map.territories_as_json()})
     except War.DoesNotExist:
         raise Http404("War does not exist")
 

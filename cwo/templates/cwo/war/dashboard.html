@@ -181,6 +181,7 @@
     }
 
     var showOwnership = function(ownership, participants){
+        console.debug('showOwnership');
         var sDate = $('#date').val();
         for(k in ownership){
             var values = ownership[k],
@@ -198,6 +199,22 @@
                     setStyle(el, owner[1], desc, "url(#diagonalHatch)", 0.5, '#808080')
                 }
             }
+        }
+
+        for(tid in gTerritories){
+            var tr = gTerritories[tid],
+                cnt = 0,
+                eventsArray = tr.events.filter(function(d){ cnt = cnt+1; return cnt<79 && d[2]<=sDate; });
+
+            console.debug(eventsArray);
+
+            d3.select("#event-list-"+tid).selectAll("p").data(eventsArray).enter()
+                .append("p")
+                    .attr('style', function(d){
+                        var p = getParticipant(gParticipants, d[1], d[2]);
+                        if(p){ return 'color: '+p.color; }else{ return 'color: #cccccc' }
+                    })
+                    .text(function(d) { return d[3]; });
         }
     }
 
@@ -250,24 +267,24 @@
 
     }
 
-    var date = new Date()
-        date1 = new Date(date),
+    var date0 = '{{ warmap.last_date_str }}'
+        date7 = '{{ warmap.last_date7_str }}',
         gOwnership = null,
         gParticipants = null;
+        gTerritories = null;
 
-    date1.setDate(date1.getDate() - 7);
-
-    $('#date').val(date.toISOString().split('T').join(' ').split('.')[0]);
-    $('#date1').val(date1.toISOString().split('T').join(' ').split('.')[0]);
-    $('#date2').val(date.toISOString().split('T').join(' ').split('.')[0]);
+    $('#date').val(date0);
+    $('#date1').val(date7);
+    $('#date2').val(date0);
 
     d3.json( '/wars/{{war.id}}/dashboard/systems', function (json) {
-        var trs = json.territories;
         gOwnership = json.structures;
         gParticipants = json.participants;
-        for(tid in trs){
+        gTerritories = json.territories
 
-            var tr=trs[tid]
+        for(tid in gTerritories){
+
+            var tr = gTerritories[tid]
 
             $('#timeline'+tid).highcharts({
                 chart: { type: 'line' },
@@ -276,18 +293,10 @@
                 xAxis: { type: 'datetime', title: { text: 'Date'} },
                 yAxis: { title: { text: 'Sov Power' }, min: 0 },
                 tooltip: { enabled: true },
-                plotOptions: { line: { enableMouseTracking: true, animation: false, marker: { enabled: true } } },
+                plotOptions: { line: { enableMouseTracking: true, animation: false, marker: { enabled: false } } },
                 exporting: { enabled: false },
                 series: tr.powers
             });
-
-            d3.select("#event-list-"+tid).selectAll("line").data(tr.events).enter()
-                    .append("p")
-                        .attr('style', function(d){
-                            var p = getParticipant(gParticipants, d[1], d[2]);
-                            if(p){ return 'color: '+p.color; }else{ return 'color: #cccccc' }
-                        })
-                        .text(function(d) { return d[3]; });
 
             var svg = d3.select("#t"+tid)
                         .call(
@@ -304,7 +313,7 @@
 
                                   root.selectAll("circle.sys").attr('r', 2.0/k );
 
-                                  root.selectAll("circle.ev").attr('r', 15.0/k );
+                                  root.selectAll("circle.ev").attr('r', 15.0/k ).attr('stroke-width', 1.0 / k);
 
                                   root.selectAll("line").attr('stroke-width', 1.0 / k);
 

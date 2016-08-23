@@ -77,7 +77,6 @@ svg circle.sys{
 }
 
 svg circle.ev{
-  stroke-width: 1;
   fill: none;
   stroke-dasharray: 2 2;
 }
