@@ -10,6 +10,10 @@ class System(models.Model):
     y = models.FloatField()
     z = models.FloatField()
 
+    ax = models.FloatField(null=True)
+    ay = models.FloatField(null=True)
+    az = models.FloatField(null=True)
+
     def __str__(self):
         return "[{}] {}".format(self.id, self.name)
 
