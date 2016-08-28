@@ -153,9 +153,9 @@ class WarMap:
         return [
             system.id,
             system.name,
-            Decimal( (system.x - minmax['minx']) / minmax['factor'] ).quantize(Decimal('.01')),
-            Decimal( (system.y - minmax['miny']) / minmax['factor'] ).quantize(Decimal('.01')),
-            Decimal( 1000-(system.z - minmax['minz']) / minmax['factor'] ).quantize(Decimal('.01'))
+            Decimal( (system.ax - minmax['minx']) / minmax['factor'] ).quantize(Decimal('.01')),
+            Decimal( (system.ay - minmax['miny']) / minmax['factor'] ).quantize(Decimal('.01')),
+            Decimal( 1000-(system.az - minmax['minz']) / minmax['factor'] ).quantize(Decimal('.01'))
         ]
 
     def minmax(self):
