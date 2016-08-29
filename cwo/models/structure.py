@@ -15,8 +15,8 @@ class Structure(models.Model):
     structure_id = models.BigIntegerField()
     system_id = models.BigIntegerField(db_index=True)
     type_id = models.BigIntegerField()
-    date1 = models.DateTimeField()
-    date2 = models.DateTimeField()
+    date1 = models.DateTimeField(db_index=True)
+    date2 = models.DateTimeField(db_index=True)
 
     def __str__(self):
         return "[{}]".format(self.id)

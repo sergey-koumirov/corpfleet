@@ -182,7 +182,14 @@
 
     var showOwnership = function(ownership, participants){
         console.debug('showOwnership');
-        var sDate = $('#date').val();
+        var sDate = $('#date').val(),
+            sd = new Date(sDate),
+            d7 = new Date(sd);
+        d7.setDate(d7.getDate()-7);
+        var sd7 = d7.toISOString().split('T').join(' ').split('.')[0];
+
+        console.debug(sd7, sDate)
+
         for(k in ownership){
             var values = ownership[k],
                 owner = getOwnerOnDate(values,sDate),
@@ -206,7 +213,7 @@
                 cnt = 0;
 
             var eventsArray = tr.events.filter(function(d){
-                var show = cnt<49 && d[2]<=sDate;
+                var show = (sd7 <= d[2] && d[2] <= sDate);
                 if(show){
                     cnt = cnt+1;
                     return true;
@@ -232,6 +239,29 @@
                     .text(function(d) { return d[3]; });
 
             eventNodes.exit().remove();
+
+            var eventsCircles = d3.select("#t"+tid).selectAll("circle.ev").data(eventsArray);
+            eventsCircles.enter().append("circle")
+                .attr("cx", function(d) { return tr.systems[d[0]][2]; })
+                .attr("cy", function(d) { return tr.systems[d[0]][4]; })
+                .attr("class","ev")
+                .attr("r", 16.0)
+                .attr("stroke-opacity", .25)
+                .attr("stroke", function(d){
+                            var p = getParticipant(gParticipants, d[1], d[2]);
+                            if(p){ return p.color; }else{ return '#cccccc' }
+                        });
+
+            eventsCircles
+                .attr("cx", function(d) { return tr.systems[d[0]][2]; })
+                .attr("cy", function(d) { return tr.systems[d[0]][4]; })
+                .attr("stroke", function(d){
+                    var p = getParticipant(gParticipants, d[1], d[2]);
+                    if(p){ return p.color; }else{ return '#cccccc' }
+                });
+
+            eventsCircles.exit().remove();
+
         }
     }
 
@@ -330,7 +360,7 @@
 
                                   root.selectAll("circle.sys").attr('r', 2.0/k );
 
-                                  root.selectAll("circle.ev").attr('r', 15.0/k ).attr('stroke-width', 1.0 / k);
+                                  root.selectAll("circle.ev").attr('r', 16.0/k ).attr('stroke-width', 1.0 / k);
 
                                   root.selectAll("line").attr('stroke-width', 1.0 / k);
 
@@ -351,18 +381,6 @@
                 .attr("height", "100%")
                 .attr("class", "overlay")
                 .attr("fill","#ffffff");
-
-            var events = svg.selectAll("circle.ev").data(tr.events);
-            events.enter().append("circle")
-                .attr("cx", function(d) { return tr.systems[d[0]][2]; })
-                .attr("cy", function(d) { return tr.systems[d[0]][4]; })
-                .attr("class","ev")
-                .attr("r", 15.0)
-                .attr("stroke-opacity", .25)
-                .attr("stroke", function(d){
-                            var p = getParticipant(gParticipants, d[1], d[2]);
-                            if(p){ return p.color; }else{ return '#cccccc' }
-                        });
 
             svg.selectAll("line").data(tr.links).enter()
                     .append("line")

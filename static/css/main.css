@@ -91,16 +91,18 @@ ul.participant{
 }
 
 .event-list{
-    width: 250px;
     float: right;
     font-size: 9px;
     position: absolute;
     left: 1110;
     top: 10px;
+    height: 1000px;
+    column-width: 250px;
 }
 
 .event-list p{
     margin: 2px;
+    width: 250px;
 }
 
 .overlap{
