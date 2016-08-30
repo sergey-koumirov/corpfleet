@@ -25,8 +25,7 @@ SECRET_KEY = '=9=bqvbvxxx7^uo#uvalr(4zb*o-b@!7ol1eh1(m)=d4-3^g#+'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['localhost', '127.0.0.1','forest-tales.tk']
 
 # Application definition
 
